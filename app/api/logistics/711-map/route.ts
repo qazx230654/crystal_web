@@ -5,7 +5,7 @@ export const dynamic = "force-dynamic";
 
 export async function GET(request: Request) {
   const url = new URL(request.url);
-  const siteUrl = ecpayLogisticsConfig.siteUrl || url.origin;
+  const siteUrl = normalizeSiteUrl(ecpayLogisticsConfig.siteUrl || url.origin);
   const guest = url.searchParams.get("guest") === "1" ? "1" : "0";
   const serverReplyUrl = `${siteUrl}/api/logistics/711-callback`;
   const fields = {
@@ -28,6 +28,10 @@ export async function GET(request: Request) {
 
 function createMerchantTradeNo() {
   return `CVS${Date.now().toString().slice(-12)}`;
+}
+
+function normalizeSiteUrl(value: string) {
+  return value.replace(/\/+$/, "");
 }
 
 function renderAutoSubmitForm(action: string, fields: Record<string, string>) {
