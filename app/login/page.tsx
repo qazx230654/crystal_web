@@ -48,7 +48,7 @@ export default function LoginPage() {
     <section className="container-shell flex min-h-[70vh] items-center justify-center py-14">
       <div className="w-full max-w-md rounded-md border border-crystal-line bg-white/76 p-8 shadow-soft">
         <Link className="font-serif text-2xl font-semibold text-crystal-rose" href="/">
-          椛 · Crystal
+          Crystal
         </Link>
         <p className="mt-2 text-xs font-bold uppercase tracking-[0.28em] text-crystal-muted">Crystal Energy</p>
         <h1 className="mt-8 text-3xl font-semibold">會員登入</h1>

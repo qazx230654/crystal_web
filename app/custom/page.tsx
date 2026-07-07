@@ -9,7 +9,7 @@ export default function CustomPage() {
   return (
     <section className="container-shell py-14">
       <div className="rounded-md border border-crystal-line bg-white/62 p-8 shadow-soft md:p-12">
-        <p className="text-xs font-bold uppercase tracking-[0.32em] text-crystal-rose">椛．crystal</p>
+        <p className="text-xs font-bold uppercase tracking-[0.32em] text-crystal-rose">Crystal</p>
         <h1 className="mt-4 max-w-3xl font-serif text-5xl font-semibold leading-tight md:text-7xl">
           遇見您的
           <span className="block text-crystal-rose">專屬能量對話</span>

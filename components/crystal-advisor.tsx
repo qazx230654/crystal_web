@@ -7,7 +7,7 @@ const quickReplies = ["我想招財", "想穩定情緒", "想看客製方案"];
 
 export function CrystalAdvisor() {
   const [open, setOpen] = useState(false);
-  const [messages, setMessages] = useState(["你好！我是椛小助，想找哪一種能量呢？"]);
+  const [messages, setMessages] = useState(["你好！我是 Crystal 小助，想找哪一種能量呢？"]);
 
   return (
     <>
@@ -16,7 +16,7 @@ export function CrystalAdvisor() {
           <div className="flex items-center justify-between bg-crystal-ink px-4 py-3 text-white">
             <div>
               <p className="text-sm font-semibold">水晶顧問</p>
-              <p className="text-xs text-white/70">24 小時椛小助人工智能服務</p>
+              <p className="text-xs text-white/70">24 小時 Crystal 小助人工智能服務</p>
             </div>
             <button onClick={() => setOpen(false)} type="button">
               <X size={18} />

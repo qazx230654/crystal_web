@@ -36,7 +36,7 @@ export default function ShoppingGuidePage() {
             聯絡我們
           </Link>
           <button className="rounded-full border border-crystal-line bg-white px-5 py-3 text-sm font-semibold" type="button">
-            問問24小時椛小助人工智能服務
+            問問24小時 Crystal 小助人工智能服務
           </button>
         </div>
       </div>
