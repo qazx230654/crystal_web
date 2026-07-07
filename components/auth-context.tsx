@@ -12,7 +12,9 @@ type Member = {
   } | null;
   user: {
     email?: string;
+    email_confirmed_at?: string | null;
     id: string;
+    user_metadata?: Record<string, unknown>;
   };
 };
 

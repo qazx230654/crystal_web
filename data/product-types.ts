@@ -9,6 +9,8 @@ export type Category =
   | "perfume"
   | "other";
 
+export type ProductStatus = "active" | "soldout" | "draft" | "hidden";
+
 export type Product = {
   id: string;
   slug: string;
@@ -24,6 +26,7 @@ export type Product = {
   stockLabel: string;
   sales: number;
   createdAt: string;
+  status?: ProductStatus;
 };
 
 export const categoryLabels: Record<Category | "all", string> = {
@@ -37,4 +40,11 @@ export const categoryLabels: Record<Category | "all", string> = {
   charm: "吊飾",
   perfume: "能量香水",
   other: "其他"
+};
+
+export const productStatusLabels: Record<ProductStatus, string> = {
+  active: "上架中",
+  soldout: "售完展示",
+  draft: "草稿",
+  hidden: "隱藏"
 };

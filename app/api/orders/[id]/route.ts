@@ -43,7 +43,7 @@ export async function PATCH(request: Request, { params }: { params: { id: string
     return NextResponse.json({ data: order });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unable to update order";
-    const status = error instanceof SupabaseConfigError ? 500 : 400;
+    const status = error instanceof SupabaseConfigError ? 500 : message === "Order not found" ? 404 : 400;
 
     return NextResponse.json({
       error: {

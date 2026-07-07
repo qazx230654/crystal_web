@@ -7,6 +7,7 @@ export type ProductSort = (typeof productSortOptions)[number];
 
 export type ProductQuery = {
   category?: Category;
+  includeInactive?: boolean;
   sort?: string;
 };
 
@@ -17,7 +18,7 @@ export type CategorySummary = {
 };
 
 export async function listProducts(query: ProductQuery = {}) {
-  const products = await getProducts();
+  const products = await getProducts({ includeInactive: query.includeInactive });
   return sortProducts(filterProducts(products, query.category), query.sort);
 }
 

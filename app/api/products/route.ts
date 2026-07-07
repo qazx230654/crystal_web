@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { listProducts } from "@/services/product-service";
 import type { Category } from "@/data/product-types";
+import { getProductSource } from "@/data/product-source";
 
 export const dynamic = "force-dynamic";
 
@@ -19,7 +20,7 @@ export async function GET(request: Request) {
       count: products.length,
       category,
       sort: sort ?? "銷售量",
-      source: process.env.PRODUCT_SOURCE ?? "mock"
+      source: getProductSource()
     }
   });
 }

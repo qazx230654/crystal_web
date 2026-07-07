@@ -3,8 +3,8 @@
 @tailwind utilities;
 
 :root {
-  --font-sans: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", system-ui, sans-serif;
-  --font-serif: "Cormorant Garamond", Georgia, "Times New Roman", "Noto Serif TC", serif;
+  --font-sans: "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", system-ui, sans-serif;
+  --font-serif: "Songti TC", "STSong", "Hiragino Mincho ProN", "Noto Serif TC", "Cormorant Garamond", Georgia, serif;
   color-scheme: light;
 }
 
@@ -22,6 +22,13 @@ body {
     radial-gradient(circle at top left, rgba(247, 231, 225, 0.78), transparent 34rem),
     linear-gradient(180deg, #fffaf6 0%, #f8f2ed 48%, #fffaf6 100%);
   color: #302b28;
+  font-family: var(--font-sans);
+  font-size: 15px;
+  line-height: 1.75;
+  letter-spacing: 0.025em;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 button,
@@ -40,6 +47,28 @@ select {
 .container-shell {
   width: min(1180px, calc(100% - 32px));
   margin-inline: auto;
+}
+
+@layer base {
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-serif);
+    font-weight: 400;
+    letter-spacing: 0.055em;
+  }
+
+  p,
+  li,
+  dd,
+  dt {
+    font-size: 0.95em;
+  }
+
+  small {
+    letter-spacing: 0.08em;
+  }
 }
 
 .marquee-track {

@@ -16,8 +16,8 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: { message: "請輸入姓名、Email 與密碼" } }, { status: 400 });
     }
 
-    if (password.length < 6) {
-      return NextResponse.json({ error: { message: "密碼至少需要 6 個字元" } }, { status: 400 });
+    if (password.length < 8) {
+      return NextResponse.json({ error: { message: "密碼至少需要 8 個字元" } }, { status: 400 });
     }
 
     const session = await signUpMember({ email, lineId, name, password, phone });

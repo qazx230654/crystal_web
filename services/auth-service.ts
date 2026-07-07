@@ -18,6 +18,7 @@ export type MemberProfile = {
 
 type SupabaseAuthUser = {
   email?: string;
+  email_confirmed_at?: string | null;
   id: string;
   user_metadata?: Record<string, unknown>;
 };
@@ -101,6 +102,33 @@ export async function signInMember(email: string, password: string) {
   }
 
   return payload;
+}
+
+export async function resendSignupVerification(email: string) {
+  return supabaseAuthRequest<{ message?: string }>("/resend", {
+    body: {
+      email,
+      type: "signup"
+    },
+    method: "POST"
+  });
+}
+
+export async function sendPasswordResetEmail(email: string, redirectTo: string) {
+  return supabaseAuthRequest<{ message?: string }>(`/recover?redirect_to=${encodeURIComponent(redirectTo)}`, {
+    body: {
+      email
+    },
+    method: "POST"
+  });
+}
+
+export async function updatePassword(accessToken: string, password: string) {
+  return supabaseAuthRequest<SupabaseAuthUser>("/user", {
+    accessToken,
+    body: { password },
+    method: "PUT"
+  });
 }
 
 export async function getCurrentMember(request: Request) {
@@ -190,7 +218,7 @@ async function supabaseAuthRequest<T>(
   options: {
     accessToken?: string;
     body?: unknown;
-    method: "GET" | "POST";
+    method: "GET" | "POST" | "PUT";
   }
 ) {
   if (!supabaseUrl || !supabaseAuthKey) {

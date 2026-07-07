@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { contactLinks } from "@/config/contact";
 
 const syllabus = [
   ["2HR", "理論與知識／創業基礎", "基礎美學、金屬材質、常用配件與小資創業 SOP。"],
@@ -28,7 +29,7 @@ export default function WorkshopPage() {
               </div>
             ))}
           </div>
-          <a className="mt-8 inline-flex rounded-full bg-crystal-ink px-6 py-3 text-sm font-semibold text-white" href="https://line.me/R/ti/p/@011tymeh" rel="noreferrer" target="_blank">
+          <a className="mt-8 inline-flex rounded-full bg-crystal-ink px-6 py-3 text-sm font-semibold text-white" href={contactLinks.line.href} rel="noreferrer" target="_blank">
             聯繫 LINE 諮詢課程
           </a>
         </div>

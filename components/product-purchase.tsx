@@ -14,6 +14,7 @@ export function ProductPurchase({ product }: { product: Product }) {
   const [quantity, setQuantity] = useState(1);
   const { addItem } = useCart();
   const price = product.price + (clasp === "龍蝦扣" ? 200 : 0);
+  const soldOut = product.status === "soldout";
 
   return (
     <div>
@@ -64,13 +65,15 @@ export function ProductPurchase({ product }: { product: Product }) {
             </button>
           </div>
           <button
-            className="min-w-64 flex-1 rounded-full bg-crystal-ink px-6 py-3 font-semibold text-white"
+            className="min-w-64 flex-1 rounded-full bg-crystal-ink px-6 py-3 font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50"
+            disabled={soldOut}
             onClick={() => {
+              if (soldOut) return;
               for (let i = 0; i < quantity; i += 1) addItem(product, { size, clasp, fit });
             }}
             type="button"
           >
-            加入購物袋
+            {soldOut ? "目前售完" : "加入購物袋"}
           </button>
         </div>
         <p className="rounded-md border border-crystal-line bg-white/72 p-4 text-sm text-crystal-muted">出貨時間：{product.stockLabel}</p>

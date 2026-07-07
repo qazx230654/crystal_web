@@ -8,6 +8,7 @@ import { useCart } from "@/components/cart-context";
 
 export function ProductCard({ product }: { product: Product }) {
   const { addItem } = useCart();
+  const soldOut = product.status === "soldout";
 
   return (
     <article className="group overflow-hidden rounded-md border border-crystal-line bg-white/75 shadow-[0_10px_30px_rgba(90,65,55,0.06)] transition hover:-translate-y-1 hover:shadow-soft">
@@ -21,16 +22,19 @@ export function ProductCard({ product }: { product: Product }) {
             src={product.image}
           />
           <button
-            className="absolute right-3 top-3 grid h-10 w-10 place-items-center rounded-full bg-white/90 text-crystal-ink shadow-soft"
+            className="absolute right-3 top-3 grid h-10 w-10 place-items-center rounded-full bg-white/90 text-crystal-ink shadow-soft disabled:cursor-not-allowed disabled:opacity-50"
+            disabled={soldOut}
             onClick={(event) => {
               event.preventDefault();
+              if (soldOut) return;
               addItem(product);
             }}
-            title="加入購物袋"
+            title={soldOut ? "商品售完" : "加入購物袋"}
             type="button"
           >
             <ShoppingBag size={17} />
           </button>
+          {soldOut ? <span className="absolute bottom-3 left-3 bg-crystal-ink/88 px-3 py-1 text-[11px] font-semibold text-white">售完展示</span> : null}
         </div>
         <div className="p-4">
           <div className="mb-3 flex flex-wrap gap-1.5">

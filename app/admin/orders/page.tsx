@@ -1,9 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import Link from "next/link";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 
 const statuses = ["pending", "paid", "making", "shipped", "completed", "cancelled"];
+const filterStatuses = ["all", ...statuses];
 
 const statusLabels: Record<string, string> = {
   pending: "待確認",
@@ -12,6 +14,15 @@ const statusLabels: Record<string, string> = {
   shipped: "已出貨",
   completed: "已完成",
   cancelled: "已取消"
+};
+
+const statusTransitions: Record<string, string[]> = {
+  pending: ["paid", "cancelled"],
+  paid: ["making", "cancelled"],
+  making: ["shipped", "cancelled"],
+  shipped: ["completed"],
+  completed: [],
+  cancelled: []
 };
 
 const eventTypeLabels: Record<string, string> = {
@@ -40,9 +51,36 @@ export default function AdminOrdersPage() {
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [details, setDetails] = useState<Record<string, any>>({});
   const [detailsLoading, setDetailsLoading] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
+
+  const visibleOrders = useMemo(() => {
+    const keyword = searchTerm.trim().toLowerCase();
+
+    return orders.filter((order) => {
+      const matchesStatus = statusFilter === "all" || order.status === statusFilter;
+      const matchesKeyword = !keyword || [
+        order.order_number,
+        order.customer_name,
+        order.customer_phone,
+        order.customer_email
+      ].some((value) => String(value ?? "").toLowerCase().includes(keyword));
+
+      return matchesStatus && matchesKeyword;
+    });
+  }, [orders, searchTerm, statusFilter]);
+
+  const statusCounts = useMemo(() => {
+    return orders.reduce<Record<string, number>>((counts, order) => {
+      counts.all += 1;
+      counts[order.status] = (counts[order.status] ?? 0) + 1;
+      return counts;
+    }, { all: 0 });
+  }, [orders]);
 
   async function loadOrders() {
     setLoading(true);
+    setError(null);
     const response = await fetch("/api/orders");
     const payload = await response.json();
     setLoading(false);
@@ -60,9 +98,18 @@ export default function AdminOrdersPage() {
     setOrders(payload.data);
   }
 
-  async function updateStatus(id: string, status: string) {
-    const response = await fetch(`/api/orders/${id}`, {
-      body: JSON.stringify({ status }),
+  async function updateStatus(order: any, status: string) {
+    if (status === order.status) return;
+
+    let message = "";
+    if (status === "cancelled") {
+      const reason = window.prompt("請輸入取消原因");
+      if (!reason?.trim()) return;
+      message = `訂單已取消：${reason.trim()}`;
+    }
+
+    const response = await fetch(`/api/orders/${order.id}`, {
+      body: JSON.stringify({ message, status }),
       headers: {
         "Content-Type": "application/json"
       },
@@ -74,7 +121,19 @@ export default function AdminOrdersPage() {
       return;
     }
 
-    if (response.ok) loadOrders();
+    const payload = await response.json().catch(() => null);
+
+    if (!response.ok) {
+      setError(payload?.error?.message ?? "訂單狀態更新失敗");
+      return;
+    }
+
+    setDetails((current) => {
+      const next = { ...current };
+      delete next[order.id];
+      return next;
+    });
+    loadOrders();
   }
 
   async function logout() {
@@ -117,12 +176,54 @@ export default function AdminOrdersPage() {
           <p className="text-xs font-bold uppercase tracking-[0.28em] text-crystal-rose">Admin</p>
           <h1 className="mt-3 font-serif text-5xl font-semibold">訂單管理</h1>
         </div>
-        <button className="rounded-full border border-crystal-line bg-white px-5 py-3 text-sm font-semibold text-crystal-ink" onClick={logout} type="button">
-          登出
-        </button>
+        <div className="flex flex-wrap gap-2">
+          <Link className="rounded-full border border-crystal-line bg-white px-5 py-3 text-sm font-semibold text-crystal-ink" href="/admin/products">
+            商品管理
+          </Link>
+          <button className="rounded-full border border-crystal-line bg-white px-5 py-3 text-sm font-semibold text-crystal-ink" onClick={logout} type="button">
+            登出
+          </button>
+        </div>
       </div>
       {error ? <p className="mt-6 rounded-md bg-red-50 p-4 text-red-700">{error}</p> : null}
-      <div className="mt-8 overflow-hidden rounded-md border border-crystal-line bg-white/72 shadow-soft">
+
+      <div className="mt-8 rounded-md border border-crystal-line bg-white/72 p-5 shadow-soft">
+        <div className="grid gap-4 lg:grid-cols-[1fr_220px]">
+          <label className="grid gap-2">
+            <span className="text-xs font-bold tracking-[0.16em] text-crystal-muted">搜尋訂單</span>
+            <input
+              className="rounded-md border border-crystal-line bg-white px-4 py-3 text-sm outline-crystal-rose"
+              onChange={(event) => setSearchTerm(event.target.value)}
+              placeholder="訂單編號、姓名、手機、Email"
+              value={searchTerm}
+            />
+          </label>
+          <label className="grid gap-2">
+            <span className="text-xs font-bold tracking-[0.16em] text-crystal-muted">狀態篩選</span>
+            <select className="rounded-md border border-crystal-line bg-white px-4 py-3 text-sm outline-crystal-rose" onChange={(event) => setStatusFilter(event.target.value)} value={statusFilter}>
+              {filterStatuses.map((status) => (
+                <option key={status} value={status}>
+                  {status === "all" ? "全部訂單" : getStatusLabel(status)}（{statusCounts[status] ?? 0}）
+                </option>
+              ))}
+            </select>
+          </label>
+        </div>
+        <div className="mt-4 flex flex-wrap gap-2">
+          {filterStatuses.map((status) => (
+            <button
+              className={`rounded-full border px-4 py-2 text-xs font-semibold ${statusFilter === status ? "border-crystal-ink bg-crystal-ink text-white" : "border-crystal-line bg-white text-crystal-muted"}`}
+              key={status}
+              onClick={() => setStatusFilter(status)}
+              type="button"
+            >
+              {status === "all" ? "全部" : getStatusLabel(status)} {statusCounts[status] ?? 0}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="mt-6 overflow-hidden rounded-md border border-crystal-line bg-white/72 shadow-soft">
         <div className="grid grid-cols-[1.1fr_0.8fr_0.8fr_0.8fr_1fr] gap-3 border-b border-crystal-line px-5 py-3 text-xs font-bold tracking-[0.16em] text-crystal-muted">
           <span>訂單</span>
           <span>顧客</span>
@@ -131,8 +232,12 @@ export default function AdminOrdersPage() {
           <span>操作</span>
         </div>
         {loading ? <p className="p-5 text-crystal-muted">讀取中...</p> : null}
-        {orders.map((order) => {
+        {!loading && !visibleOrders.length ? <p className="p-5 text-crystal-muted">沒有符合條件的訂單。</p> : null}
+        {visibleOrders.map((order) => {
           const detail = details[order.id];
+          const nextStatuses = statusTransitions[order.status] ?? [];
+          const selectableStatuses = [order.status, ...nextStatuses];
+          const canUpdateStatus = nextStatuses.length > 0;
 
           return (
             <div className="border-b border-crystal-line" key={order.id}>
@@ -150,8 +255,13 @@ export default function AdminOrdersPage() {
                 <span>NT$ {order.total.toLocaleString()}</span>
                 <span>{getStatusLabel(order.status)}</span>
                 <div className="flex flex-wrap gap-2">
-                  <select className="rounded border border-crystal-line bg-white px-2 py-1" defaultValue={order.status} onChange={(event) => updateStatus(order.id, event.target.value)}>
-                    {statuses.map((status) => (
+                  <select
+                    className="rounded border border-crystal-line bg-white px-2 py-1 disabled:bg-crystal-pearl disabled:text-crystal-muted"
+                    disabled={!canUpdateStatus}
+                    onChange={(event) => updateStatus(order, event.target.value)}
+                    value={order.status}
+                  >
+                    {selectableStatuses.map((status) => (
                       <option key={status} value={status}>{getStatusLabel(status)}</option>
                     ))}
                   </select>

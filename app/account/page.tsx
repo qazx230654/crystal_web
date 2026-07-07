@@ -29,11 +29,13 @@ function getStatusLabel(status: string) {
 export default function AccountPage() {
   const router = useRouter();
   const { loading, logout, member, refreshMember } = useAuth();
+  const [activeTab, setActiveTab] = useState<"orders" | "settings">("orders");
   const [orders, setOrders] = useState<AccountOrder[]>([]);
   const [ordersLoading, setOrdersLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const [resending, setResending] = useState(false);
 
   useEffect(() => {
     if (loading) return;
@@ -69,9 +71,9 @@ export default function AccountPage() {
     const formData = new FormData(event.currentTarget);
     const response = await fetch("/api/account/profile", {
       body: JSON.stringify({
-        lineId: String(formData.get("lineId") ?? ""),
+        lineId: member?.profile?.line_id ?? "",
         name: String(formData.get("name") ?? ""),
-        phone: String(formData.get("phone") ?? "")
+        phone: member?.profile?.phone ?? ""
       }),
       headers: { "Content-Type": "application/json" },
       method: "PATCH"
@@ -88,6 +90,23 @@ export default function AccountPage() {
     setMessage("會員資料已更新");
   }
 
+  async function resendVerification() {
+    setError(null);
+    setMessage(null);
+    setResending(true);
+
+    const response = await fetch("/api/auth/resend-verification", { method: "POST" });
+    const payload = await response.json();
+    setResending(false);
+
+    if (!response.ok) {
+      setError(payload.error?.message ?? "驗證信發送失敗");
+      return;
+    }
+
+    setMessage("驗證信已重新寄出");
+  }
+
   async function handleLogout() {
     await logout();
     router.replace("/login");
@@ -102,65 +121,104 @@ export default function AccountPage() {
   }
 
   const profile = member.profile;
+  const email = profile?.email ?? member.user.email ?? "";
+  const metadataName = typeof member.user.user_metadata?.name === "string" ? member.user.user_metadata.name : "";
+  const displayName = profile?.name || metadataName || email.split("@")[0] || "會員";
+  const emailVerified = Boolean(member.user.email_confirmed_at);
 
   return (
-    <section className="container-shell py-12">
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <p className="text-xs font-bold uppercase tracking-[0.28em] text-crystal-rose">Account</p>
-          <h1 className="mt-3 font-serif text-5xl font-semibold">會員中心</h1>
-          <p className="mt-3 text-sm text-crystal-muted">{profile?.email ?? member.user.email}</p>
+    <section className="bg-[#f8f5f2] pb-20">
+      <div className="border-b border-crystal-line bg-white">
+        <div className="container-shell flex items-start justify-between gap-4 py-8">
+          <div>
+            <p className="text-xs font-medium uppercase tracking-[0.34em] text-crystal-muted">Member Center</p>
+            <h1 className="mt-2 text-2xl font-semibold text-crystal-ink">歡迎回來，{displayName}</h1>
+            <p className="mt-1 text-sm text-crystal-muted">{email}</p>
+          </div>
+          <button className="border border-crystal-line bg-white px-5 py-3 text-sm text-crystal-muted transition hover:border-crystal-ink hover:text-crystal-ink" onClick={handleLogout} type="button">
+            登出
+          </button>
         </div>
-        <button className="rounded-full border border-crystal-line bg-white px-5 py-3 text-sm font-semibold text-crystal-ink" onClick={handleLogout} type="button">
-          登出
-        </button>
       </div>
 
-      {error ? <p className="mt-6 rounded-md bg-red-50 p-4 text-sm text-red-700">{error}</p> : null}
-      {message ? <p className="mt-6 rounded-md bg-emerald-50 p-4 text-sm text-emerald-700">{message}</p> : null}
-
-      <div className="mt-8 grid gap-8 lg:grid-cols-[360px_1fr]">
-        <form className="h-fit rounded-md border border-crystal-line bg-white/72 p-6 shadow-soft" key={member.user.id} onSubmit={handleProfileSubmit}>
-          <h2 className="text-2xl font-semibold">個人資料</h2>
-          <div className="mt-5 grid gap-4">
-            <label className="grid gap-2">
-              <span className="text-sm font-semibold">姓名</span>
-              <input className="rounded-md border border-crystal-line bg-white px-4 py-3 outline-crystal-rose" defaultValue={profile?.name ?? ""} name="name" />
-            </label>
-            <label className="grid gap-2">
-              <span className="text-sm font-semibold">手機</span>
-              <input className="rounded-md border border-crystal-line bg-white px-4 py-3 outline-crystal-rose" defaultValue={profile?.phone ?? ""} name="phone" />
-            </label>
-            <label className="grid gap-2">
-              <span className="text-sm font-semibold">LINE ID</span>
-              <input className="rounded-md border border-crystal-line bg-white px-4 py-3 outline-crystal-rose" defaultValue={profile?.line_id ?? ""} name="lineId" />
-            </label>
+      <div className="container-shell py-10">
+        {!emailVerified ? (
+          <div className="flex flex-wrap items-center justify-between gap-4 border border-amber-300 bg-amber-50 px-5 py-4 text-sm text-amber-700">
+            <div>
+              <p className="font-semibold">請驗證您的 Email</p>
+              <p className="mt-1">發送驗證信到 {email}，點擊信中連結即可完成驗證。</p>
+            </div>
+            <button className="border border-amber-400 bg-white px-5 py-3 text-sm font-semibold text-amber-700 disabled:opacity-60" disabled={resending} onClick={resendVerification} type="button">
+              {resending ? "發送中..." : "重新發送驗證信"}
+            </button>
           </div>
-          <button className="mt-6 w-full rounded-full bg-crystal-ink px-5 py-3 text-sm font-semibold text-white disabled:opacity-60" disabled={saving} type="submit">
-            {saving ? "儲存中..." : "儲存資料"}
+        ) : null}
+
+        {error ? <p className="mt-6 border border-red-200 bg-red-50 p-4 text-sm text-red-700">{error}</p> : null}
+        {message ? <p className="mt-6 border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-700">{message}</p> : null}
+
+        <div className="mt-8 border-b border-crystal-line">
+          <button
+            className={`px-6 py-4 text-sm ${activeTab === "orders" ? "border-b-2 border-crystal-ink text-crystal-ink" : "text-crystal-muted"}`}
+            onClick={() => setActiveTab("orders")}
+            type="button"
+          >
+            我的訂單
           </button>
-        </form>
+          <button
+            className={`px-6 py-4 text-sm ${activeTab === "settings" ? "border-b-2 border-crystal-ink text-crystal-ink" : "text-crystal-muted"}`}
+            onClick={() => setActiveTab("settings")}
+            type="button"
+          >
+            帳號設定
+          </button>
+        </div>
 
-        <section className="rounded-md border border-crystal-line bg-white/72 p-6 shadow-soft">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <h2 className="text-2xl font-semibold">我的訂單</h2>
-            <Link className="rounded-full bg-crystal-ink px-4 py-2 text-sm font-semibold text-white" href="/products">
-              繼續選購
-            </Link>
-          </div>
-          {ordersLoading ? <p className="mt-6 text-crystal-muted">訂單讀取中...</p> : null}
-          {!ordersLoading && !orders.length ? <p className="mt-6 text-crystal-muted">目前尚無會員訂單。</p> : null}
-          <div className="mt-5 divide-y divide-crystal-line">
-            {orders.map((order) => (
-              <Link className="grid gap-2 py-4 text-sm md:grid-cols-[1fr_0.8fr_0.7fr_0.7fr]" href={`/orders/${order.id}/success`} key={order.id}>
-                <span className="font-semibold">{order.order_number}</span>
-                <span className="text-crystal-muted">{new Date(order.created_at).toLocaleDateString("zh-TW")}</span>
-                <span>{getStatusLabel(order.status)}</span>
-                <span className="font-semibold md:text-right">NT$ {order.total.toLocaleString()}</span>
-              </Link>
-            ))}
-          </div>
-        </section>
+        {activeTab === "orders" ? (
+          <section className="min-h-[340px] py-12">
+            {ordersLoading ? <p className="text-center text-crystal-muted">訂單讀取中...</p> : null}
+            {!ordersLoading && !orders.length ? (
+              <div className="grid place-items-center py-20 text-center">
+                <div className="text-4xl">🛍️</div>
+                <p className="mt-4 text-sm text-crystal-muted">還沒有任何訂單</p>
+                <Link className="mt-6 border border-crystal-ink bg-white px-6 py-3 text-sm font-semibold text-crystal-ink" href="/products">
+                  去逛逛
+                </Link>
+              </div>
+            ) : null}
+            {orders.length ? (
+              <div className="divide-y divide-crystal-line border border-crystal-line bg-white">
+                {orders.map((order) => (
+                  <Link className="grid gap-2 px-5 py-4 text-sm md:grid-cols-[1fr_0.8fr_0.7fr_0.7fr]" href={`/orders/${order.id}/success`} key={order.id}>
+                    <span className="font-semibold">{order.order_number}</span>
+                    <span className="text-crystal-muted">{new Date(order.created_at).toLocaleDateString("zh-TW")}</span>
+                    <span>{getStatusLabel(order.status)}</span>
+                    <span className="font-semibold md:text-right">NT$ {order.total.toLocaleString()}</span>
+                  </Link>
+                ))}
+              </div>
+            ) : null}
+          </section>
+        ) : (
+          <section className="py-8">
+            <form className="max-w-md border border-crystal-line bg-white p-8" key={member.user.id} onSubmit={handleProfileSubmit}>
+              <h2 className="text-xl font-semibold">修改姓名</h2>
+              <div className="mt-7 grid gap-5">
+                <label className="grid gap-2">
+                  <span className="text-xs font-medium uppercase tracking-[0.18em] text-crystal-ink">Email（不可修改）</span>
+                  <input className="border border-crystal-line bg-crystal-pearl px-4 py-3 text-sm text-crystal-muted" disabled value={email} />
+                </label>
+                <label className="grid gap-2">
+                  <span className="text-sm text-crystal-ink">姓名</span>
+                  <input className="border border-crystal-line bg-white px-4 py-3 text-sm outline-crystal-rose" defaultValue={profile?.name ?? ""} name="name" />
+                </label>
+              </div>
+              <button className="mt-6 bg-crystal-ink px-6 py-3 text-sm font-semibold text-white disabled:opacity-60" disabled={saving} type="submit">
+                {saving ? "儲存中..." : "儲存變更"}
+              </button>
+            </form>
+          </section>
+        )}
       </div>
     </section>
   );

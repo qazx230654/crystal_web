@@ -26,6 +26,7 @@ export type CreateOrderInput = {
 };
 
 export type OrderRecord = {
+  customer_name?: string;
   customer_email?: string | null;
   customer_phone?: string;
   id: string;
@@ -33,6 +34,24 @@ export type OrderRecord = {
   status: string;
   total: number;
   user_id?: string | null;
+};
+
+export const orderStatusLabels: Record<string, string> = {
+  pending: "待確認",
+  paid: "已付款",
+  making: "製作中",
+  shipped: "已出貨",
+  completed: "已完成",
+  cancelled: "已取消"
+};
+
+export const orderStatusTransitions: Record<string, string[]> = {
+  pending: ["paid", "cancelled"],
+  paid: ["making", "cancelled"],
+  making: ["shipped", "cancelled"],
+  shipped: ["completed"],
+  completed: [],
+  cancelled: []
 };
 
 type OrderItemInsert = {
@@ -152,6 +171,24 @@ export async function lookupOrder(identifier: string, verifier: string) {
 }
 
 export async function updateOrderStatus(id: string, status: string, message?: string) {
+  const result = await getOrderById(id);
+  const currentOrder = result.order as OrderRecord | null;
+
+  if (!currentOrder) {
+    throw new Error("Order not found");
+  }
+
+  const currentStatus = currentOrder.status;
+  const allowedStatuses = orderStatusTransitions[currentStatus] ?? [];
+
+  if (status !== currentStatus && !allowedStatuses.includes(status)) {
+    throw new Error(`無法將訂單狀態從「${getOrderStatusLabel(currentStatus)}」改為「${getOrderStatusLabel(status)}」`);
+  }
+
+  if (status === "cancelled" && !message?.trim()) {
+    throw new Error("取消訂單需要填寫原因");
+  }
+
   const [order] = await supabaseRest<OrderRecord[]>("orders", {
     body: {
       status,
@@ -165,13 +202,17 @@ export async function updateOrderStatus(id: string, status: string, message?: st
     body: {
       order_id: id,
       type: "status_changed",
-      message: message || `訂單狀態更新為 ${status}`,
-      metadata: { status }
+      message: message || `訂單狀態更新為 ${getOrderStatusLabel(status)}`,
+      metadata: { from: currentStatus, status }
     },
     method: "POST"
   });
 
   return order;
+}
+
+function getOrderStatusLabel(status: string) {
+  return orderStatusLabels[status] ?? status;
 }
 
 async function buildOrderItems(lines: OrderLineInput[]) {

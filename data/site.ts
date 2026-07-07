@@ -29,13 +29,13 @@ export const guideSections = [
     id: "shipping",
     eyebrow: "SHIPPING INFO",
     title: "運送說明",
-    body: ["台灣地區含離島：黑貓宅急便 $130、7-11 店到店 $60，單次購買兩件商品以上免運。", "海外可配送馬來西亞、香港、新加坡、美國、英國與澳洲。"]
+    body: ["台灣地區含離島：黑貓宅急便 $130、7-11 店到店 $60，單次購買兩件商品以上免運。"]
   },
   {
     id: "payment",
     eyebrow: "PAYMENT",
     title: "付款方式",
-    body: ["台灣地區支援轉帳、信用卡與 Apple Pay。", "台灣以外地區支援 PayPal。"]
+    body: ["台灣地區支援轉帳、信用卡與 Apple Pay。"]
   },
   {
     id: "faq",

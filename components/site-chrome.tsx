@@ -1,16 +1,32 @@
 "use client";
 
 import Link from "next/link";
-import { Menu, Search, ShoppingBag, User, X } from "lucide-react";
+import { ChevronDown, Menu, Search, ShoppingBag, User, X } from "lucide-react";
 import { useState } from "react";
 import { navLinks } from "@/data/site";
-import { categoryLabels } from "@/data/product-types";
 import { Brand } from "@/components/brand";
 import { CartDrawer } from "@/components/cart-drawer";
 import { CartProvider, useCart } from "@/components/cart-context";
 import { AuthProvider, useAuth } from "@/components/auth-context";
 import { CrystalAdvisor } from "@/components/crystal-advisor";
+import { contactLinks } from "@/config/contact";
 import { modules } from "@/config/modules";
+
+function AnnouncementMarquee() {
+  if (!modules.chrome.announcementMarquee) {
+    return null;
+  }
+
+  return (
+    <div className="overflow-hidden border-b border-crystal-line/70 bg-crystal-ink py-2 text-[11px] font-medium tracking-[0.18em] text-crystal-cream">
+      <div className="marquee-track flex w-max gap-12">
+        {Array.from({ length: 8 }).map((_, index) => (
+          <span key={index}>任選兩件商品免運 · 6/1-6/10 全面九折 ·</span>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -21,14 +37,18 @@ function Header() {
   const accountHref = member ? "/account" : "/login";
   const accountTitle = member ? "會員中心" : "會員登入";
 
-  const categoryEntries = Object.entries(categoryLabels).filter(([key]) => key !== "all");
+  const categoryMenu = [
+    { href: "/products", label: "查看全部商品", muted: "Shop all" },
+    { href: "/custom", label: "客製化方案", muted: "Custom plans" }
+  ];
+  const visibleNavLinks = navLinks.filter((link) => !["水晶創業班", "訂單查詢"].includes(link.label));
 
   return (
     <>
       <header className="sticky top-0 z-40 border-b border-crystal-line/80 bg-crystal-cream/88 backdrop-blur-xl">
-        <div className="container-shell relative z-20 flex h-20 items-center justify-between gap-4">
+        <div className="container-shell relative z-20 flex h-16 items-center justify-between gap-4">
           <Brand />
-          <nav className="hidden items-center gap-7 text-sm font-medium text-crystal-muted lg:flex">
+          <nav className="hidden items-center gap-7 text-xs font-medium tracking-[0.08em] text-crystal-muted lg:flex">
             <Link className="hover:text-crystal-ink" href="/products?category=monthly">
               每月限量
             </Link>
@@ -41,21 +61,40 @@ function Header() {
                 商品分類
               </button>
               {categoryOpen ? (
-                <div className="absolute left-1/2 top-9 z-50 grid w-48 -translate-x-1/2 gap-1 rounded-md border border-crystal-line bg-white p-2 shadow-soft">
-                  {categoryEntries.map(([key, label]) => (
-                    <Link
-                      className="rounded px-3 py-2 text-sm hover:bg-crystal-pearl"
-                      href={`/products?category=${key}`}
-                      key={key}
-                      onClick={() => setCategoryOpen(false)}
+                <div className="absolute left-1/2 top-9 z-50 w-60 -translate-x-1/2 border border-crystal-line bg-white shadow-soft">
+                  <div className="border-b border-crystal-line px-5 py-4 text-[10px] font-bold uppercase tracking-[0.26em] text-crystal-muted">
+                    Shop by Category
+                  </div>
+                  <div className="grid">
+                    {categoryMenu.map((item) => (
+                      <Link
+                        className="flex items-center justify-between border-b border-crystal-line px-5 py-4 text-sm transition hover:bg-crystal-pearl"
+                        href={item.href}
+                        key={item.href}
+                        onClick={() => setCategoryOpen(false)}
+                      >
+                        <span>
+                          <span className="block text-crystal-ink">{item.label}</span>
+                          <span className="mt-1 block text-[11px] text-crystal-muted">{item.muted}</span>
+                        </span>
+                        <span className="text-crystal-muted">→</span>
+                      </Link>
+                    ))}
+                    <button
+                      className="flex items-center justify-between px-5 py-4 text-left text-sm text-crystal-muted"
+                      type="button"
                     >
-                      {label}
-                    </Link>
-                  ))}
+                      <span>
+                        <span className="block text-crystal-ink">功效系列</span>
+                        <span className="mt-1 block text-[11px] text-crystal-muted">Coming later</span>
+                      </span>
+                      <ChevronDown size={15} />
+                    </button>
+                  </div>
                 </div>
               ) : null}
             </div>
-            {navLinks.slice(1).map((link) => (
+            {visibleNavLinks.slice(1).map((link) => (
               <Link className="hover:text-crystal-ink" href={link.href} key={link.href}>
                 {link.label}
               </Link>
@@ -64,7 +103,7 @@ function Header() {
           <div className="flex items-center gap-2">
             {modules.chrome.searchShortcut ? (
               <Link
-                className="hidden h-10 w-10 place-items-center rounded-full border border-crystal-line bg-white/70 text-crystal-muted transition hover:text-crystal-ink md:grid"
+                className="hidden h-9 w-9 place-items-center rounded-full border border-crystal-line bg-white/70 text-crystal-muted transition hover:text-crystal-ink md:grid"
                 href="/products"
                 title="搜尋商品"
               >
@@ -73,7 +112,7 @@ function Header() {
             ) : null}
             {modules.chrome.authShortcut ? (
               <Link
-                className="hidden h-10 w-10 place-items-center rounded-full border border-crystal-line bg-white/70 text-crystal-muted transition hover:text-crystal-ink md:grid"
+                className="hidden h-9 w-9 place-items-center rounded-full border border-crystal-line bg-white/70 text-crystal-muted transition hover:text-crystal-ink md:grid"
                 href={accountHref}
                 title={accountTitle}
               >
@@ -82,7 +121,7 @@ function Header() {
             ) : null}
             {modules.chrome.cart ? (
               <button
-                className="relative grid h-10 w-10 place-items-center rounded-full border border-crystal-line bg-white/70 text-crystal-muted transition hover:text-crystal-ink"
+                className="relative grid h-9 w-9 place-items-center rounded-full border border-crystal-line bg-white/70 text-crystal-muted transition hover:text-crystal-ink"
                 onClick={openCart}
                 title="購物車"
                 type="button"
@@ -97,7 +136,7 @@ function Header() {
             ) : null}
             {modules.chrome.mobileMenu ? (
               <button
-                className="grid h-10 w-10 place-items-center rounded-full border border-crystal-line bg-white/70 text-crystal-muted lg:hidden"
+                className="grid h-9 w-9 place-items-center rounded-full border border-crystal-line bg-white/70 text-crystal-muted lg:hidden"
                 onClick={() => setMenuOpen(true)}
                 title="選單"
                 type="button"
@@ -107,15 +146,6 @@ function Header() {
             ) : null}
           </div>
         </div>
-        {modules.chrome.announcementMarquee ? (
-          <div className="relative z-0 overflow-hidden border-t border-crystal-line/70 bg-crystal-ink py-2 text-xs font-medium text-crystal-cream">
-            <div className="marquee-track flex w-max gap-12">
-              {Array.from({ length: 8 }).map((_, index) => (
-                <span key={index}>任選兩件商品免運 · 6/1-6/10 全面九折 ·</span>
-              ))}
-            </div>
-          </div>
-        ) : null}
       </header>
 
       {menuOpen ? (
@@ -128,11 +158,11 @@ function Header() {
               </button>
             </div>
             <div className="mt-10 grid gap-3">
-              {[{ label: "所有商品", href: "/products" }, ...navLinks].map((link) => (
+              {[{ label: "所有商品", href: "/products" }, { label: "客製化方案", href: "/custom" }, ...visibleNavLinks].map((link) => (
                 <Link
                   className="rounded-md border border-crystal-line bg-white/70 px-4 py-3 text-crystal-ink"
                   href={link.href}
-                  key={link.href}
+                  key={`${link.href}-${link.label}`}
                   onClick={() => setMenuOpen(false)}
                 >
                   {link.label}
@@ -169,10 +199,10 @@ function Footer() {
         <div className="grid gap-3 text-sm text-crystal-muted">
           <span className="text-xs font-bold uppercase tracking-[0.24em] text-crystal-rose">Contact</span>
           <Link href="/contact">聯絡我們</Link>
-          <a href="https://www.instagram.com/gooday_tarot_" rel="noreferrer" target="_blank">
+          <a href={contactLinks.instagram.href} rel="noreferrer" target="_blank">
             Instagram
           </a>
-          <a href="https://line.me/R/ti/p/@011tymeh" rel="noreferrer" target="_blank">
+          <a href={contactLinks.line.href} rel="noreferrer" target="_blank">
             LINE
           </a>
         </div>
@@ -186,6 +216,7 @@ export function SiteChrome({ children }: { children: React.ReactNode }) {
     <AuthProvider>
       <CartProvider>
         <Header />
+        <AnnouncementMarquee />
         <main>{children}</main>
         {modules.chrome.footer ? <Footer /> : null}
         {modules.chrome.cart ? <CartDrawer /> : null}

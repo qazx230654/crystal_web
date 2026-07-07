@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Instagram, MessageCircle } from "lucide-react";
+import { contactLinks } from "@/config/contact";
 
 export default function ContactPage() {
   return (
@@ -11,15 +12,15 @@ export default function ContactPage() {
       <h1 className="mt-3 font-serif text-5xl font-semibold">聯絡我們</h1>
       <p className="mt-5 max-w-2xl leading-8 text-crystal-muted">有任何關於商品、訂單或能量水晶的問題，歡迎透過以下方式聯絡我們。</p>
       <div className="mt-10 grid gap-5 md:grid-cols-2">
-        <a className="rounded-md border border-crystal-line bg-white/72 p-7 shadow-soft" href="https://instagram.com/gooday_tarot_" rel="noreferrer" target="_blank">
+        <a className="rounded-md border border-crystal-line bg-white/72 p-7 shadow-soft" href={contactLinks.instagram.href} rel="noreferrer" target="_blank">
           <Instagram className="text-crystal-rose" />
           <h2 className="mt-5 text-2xl font-semibold">Instagram</h2>
-          <p className="mt-2 text-crystal-muted">gooday_tarot_</p>
+          <p className="mt-2 text-crystal-muted">{contactLinks.instagram.label}</p>
         </a>
-        <a className="rounded-md border border-crystal-line bg-white/72 p-7 shadow-soft" href="https://line.me/R/ti/p/@011tymeh" rel="noreferrer" target="_blank">
+        <a className="rounded-md border border-crystal-line bg-white/72 p-7 shadow-soft" href={contactLinks.line.href} rel="noreferrer" target="_blank">
           <MessageCircle className="text-crystal-rose" />
           <h2 className="mt-5 text-2xl font-semibold">LINE 官方帳號</h2>
-          <p className="mt-2 text-crystal-muted">@011tymeh</p>
+          <p className="mt-2 text-crystal-muted">{contactLinks.line.label}</p>
         </a>
       </div>
       <div className="mt-8 rounded-md border border-crystal-line bg-crystal-ink p-8 text-white shadow-soft">

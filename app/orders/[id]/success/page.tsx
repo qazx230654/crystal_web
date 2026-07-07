@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { contactLinks } from "@/config/contact";
 import { getOrderById } from "@/services/order-service";
 
 export const dynamic = "force-dynamic";
@@ -51,7 +52,7 @@ export default async function OrderSuccessPage({ params }: { params: { id: strin
             <div className="flex justify-between"><dt className="text-crystal-muted">運費</dt><dd>NT$ {order.shipping_fee.toLocaleString()}</dd></div>
             <div className="flex justify-between text-lg font-semibold"><dt>總計</dt><dd>NT$ {order.total.toLocaleString()}</dd></div>
           </dl>
-          <a className="mt-6 block rounded-full bg-crystal-ink px-5 py-3 text-center text-sm font-semibold text-white" href="https://line.me/R/ti/p/@011tymeh" rel="noreferrer" target="_blank">
+          <a className="mt-6 block rounded-full bg-crystal-ink px-5 py-3 text-center text-sm font-semibold text-white" href={contactLinks.line.href} rel="noreferrer" target="_blank">
             加入官方 LINE
           </a>
         </aside>
