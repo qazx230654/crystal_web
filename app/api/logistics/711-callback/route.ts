@@ -28,7 +28,7 @@ function redirectToCheckout(request: Request, values: FormData | URLSearchParams
   if (storeAddress) checkoutUrl.searchParams.set("cvsAddress", storeAddress);
   if (storeTelephone) checkoutUrl.searchParams.set("cvsTelephone", storeTelephone);
 
-  return NextResponse.redirect(checkoutUrl);
+  return NextResponse.redirect(checkoutUrl, 303);
 }
 
 function getValue(values: FormData | URLSearchParams, key: string) {
