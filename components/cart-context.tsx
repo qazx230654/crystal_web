@@ -32,6 +32,8 @@ type CartContextValue = {
   updateQuantity: (key: string, quantity: number) => void;
   refreshCartProducts: () => Promise<CartLine[]>;
   total: number;
+  removedItemCount: number;
+  dismissRemovedItemNotice: () => void;
 };
 
 const CartContext = createContext<CartContextValue | null>(null);
@@ -42,6 +44,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const [isHydrating, setIsHydrating] = useState(true);
   const [isLoaded, setIsLoaded] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
+  const [removedItemCount, setRemovedItemCount] = useState(0);
 
   const hydrateProducts = useCallback(async (cartItems: CartItem[]) => {
     if (!cartItems.length) {
@@ -61,6 +64,20 @@ export function CartProvider({ children }: { children: ReactNode }) {
       }, {});
 
       setProductsBySlug(nextProductsBySlug);
+
+      // Items whose product no longer exists (deleted/renamed) would otherwise sit
+      // invisibly in the cart forever, silently hidden from the drawer but still
+      // counted at checkout — blocking it with no way for the customer to fix it.
+      // Prune them here so the raw cart state always matches what's shown. The diff
+      // is computed against the latest state (not the cartItems snapshot) so
+      // overlapping hydrate calls during startup don't double-count removals.
+      setItems((current) => {
+        const next = current.filter((item) => nextProductsBySlug[item.slug]);
+        if (next.length === current.length) return current;
+        setRemovedItemCount((count) => count + (current.length - next.length));
+        return next;
+      });
+
       return cartItems
         .map((item) => toCartLine(item, nextProductsBySlug[item.slug]))
         .filter((line): line is CartLine => Boolean(line));
@@ -153,9 +170,11 @@ export function CartProvider({ children }: { children: ReactNode }) {
         );
       },
       refreshCartProducts: () => hydrateProducts(items),
-      total
+      total,
+      removedItemCount,
+      dismissRemovedItemNotice: () => setRemovedItemCount(0)
     };
-  }, [hydrateProducts, isHydrating, isOpen, items, lines, unavailableItems]);
+  }, [hydrateProducts, isHydrating, isOpen, items, lines, removedItemCount, unavailableItems]);
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
 }

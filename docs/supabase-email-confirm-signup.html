@@ -1,0 +1,68 @@
+<!--
+  Crystal 會員註冊驗證信 — Supabase Auth Email Template
+
+  這個檔案不會被 Next.js 專案讀取，也不會因為 git push 自動生效。
+  Supabase Auth 寄出的「Confirm signup」驗證信，樣式是設定在
+  Supabase Dashboard，不是這個 repo 裡的程式碼。
+
+  套用方式：
+  1. 打開 Supabase Dashboard → 選這個專案
+  2. 左側選單 Authentication → Email Templates
+  3. 選擇「Confirm signup」樣板
+  4. 把下面 <body> 裡的完整 HTML 貼進「Message body」欄位，儲存
+  5. Subject 欄位可以改成：驗證你的 Crystal 會員信箱
+
+  範本使用 Supabase 內建的 Go template 變數：
+  {{ .ConfirmationURL }} — 驗證連結（按鈕與底下的純文字連結都用這個）
+-->
+<div style="margin:0; padding:40px 16px; background:#fffaf6; font-family: Georgia, 'Songti TC', 'Noto Serif TC', serif;">
+  <div style="max-width:480px; margin:0 auto; background:#ffffff; border:1px solid #eadbd4; border-radius:4px; padding:48px 40px; text-align:center;">
+    <p style="margin:0; font-size:11px; font-weight:700; letter-spacing:0.32em; text-transform:uppercase; color:#b9975b;">
+      CRYSTAL ENERGY
+    </p>
+    <h1 style="margin:12px 0 0; font-size:30px; font-weight:600; letter-spacing:0.08em; color:#302b28;">
+      Crystal
+    </h1>
+    <div style="width:48px; height:1px; background:#b9975b; margin:20px auto 28px;"></div>
+
+    <p style="margin:0; font-size:15px; line-height:1.9; color:#302b28;">
+      親愛的你 🤍
+    </p>
+    <p style="margin:16px 0 0; font-size:15px; line-height:1.9; color:#302b28;">
+      點下方按鈕完成 Email 驗證，就能開始使用 Crystal，
+      找到與你頻率相近的天然晶石。
+    </p>
+
+    <div style="margin:32px 0;">
+      <a href="{{ .ConfirmationURL }}"
+         style="display:inline-block; padding:14px 40px; background:#302b28; color:#fffaf6; font-size:14px; font-weight:600; letter-spacing:0.12em; text-decoration:none; border-radius:999px;">
+        驗證 EMAIL
+      </a>
+    </div>
+
+    <p style="margin:0; font-size:12px; line-height:1.8; color:#766c66;">
+      按鈕沒反應的話，把這段連結貼到瀏覽器：
+    </p>
+    <p style="margin:8px 0 0; font-size:12px; line-height:1.7; word-break:break-all;">
+      <a href="{{ .ConfirmationURL }}" style="color:#b9975b; text-decoration:underline;">{{ .ConfirmationURL }}</a>
+    </p>
+
+    <div style="border-top:1px solid #eadbd4; margin-top:32px; padding-top:24px;">
+      <p style="margin:0; font-size:12px; line-height:1.8; color:#766c66;">
+        此連結 1 小時內有效。<br />
+        如果不是你本人申請，可以安心忽略這封信。
+      </p>
+    </div>
+
+    <p style="margin:28px 0 0; font-size:13px; letter-spacing:0.08em; color:#302b28;">
+      🌙 Crystal
+    </p>
+    <p style="margin:4px 0 0; font-size:11px; letter-spacing:0.04em; color:#766c66; font-style:italic;">
+      天然晶石 · 陪你找到自己的頻率
+    </p>
+  </div>
+
+  <p style="margin:24px 0 0; text-align:center; font-size:11px; color:#a89c93;">
+    這封信由 Crystal 自動寄出
+  </p>
+</div>

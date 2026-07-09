@@ -6,7 +6,7 @@ import { Minus, Plus, X } from "lucide-react";
 import { useCart } from "@/components/cart-context";
 
 export function CartDrawer() {
-  const { closeCart, isOpen, lines, total, updateQuantity } = useCart();
+  const { closeCart, dismissRemovedItemNotice, isOpen, lines, removedItemCount, total, updateQuantity } = useCart();
 
   if (!isOpen) return null;
 
@@ -22,6 +22,14 @@ export function CartDrawer() {
             <X size={18} />
           </button>
         </div>
+        {removedItemCount ? (
+          <div className="mx-6 mt-6 flex items-start justify-between gap-3 rounded-md border border-crystal-gold/35 bg-crystal-champagne/30 p-4 text-xs leading-5 text-crystal-ink">
+            <span>已有 {removedItemCount} 件商品下架或不再供應，系統已自動從購物袋移除。</span>
+            <button className="shrink-0 text-crystal-muted underline" onClick={dismissRemovedItemNotice} type="button">
+              知道了
+            </button>
+          </div>
+        ) : null}
         {lines.length ? (
           <>
             <div className="flex-1 space-y-4 overflow-auto p-6">

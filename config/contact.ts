@@ -1,7 +1,7 @@
 export const contactLinks = {
   instagram: {
-    label: "gooday_tarot_",
-    href: "https://instagram.com/gooday_tarot_"
+    label: "Aroam_Five",
+    href: "https://instagram.com/aroma_five"
   },
   line: {
     label: "Crystal 官方 LINE",

@@ -3,13 +3,13 @@ import type { Category } from "@/src/domain/product/types";
 export const productCategoryLabels: Record<Category | "all", string> = {
   all: "全部商品",
   monthly: "每月限量",
-  love: "愛情桃花",
-  wealth: "財運事業",
-  protect: "能量防護",
-  healing: "療癒系列",
+  love: "愛情",
+  wealth: "財運",
+  protect: "能量",
+  healing: "治癒",
   necklace: "項鍊",
   charm: "吊飾",
-  perfume: "能量香水",
+  perfume: "香氛",
   other: "其他"
 };
 

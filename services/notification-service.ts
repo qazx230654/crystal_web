@@ -62,6 +62,42 @@ export async function notifyStoreOwnerNewOrder(input: {
   });
 }
 
+export async function notifyCustomerOrderCreated(input: {
+  items: OrderItem[];
+  order: OrderRecord;
+  totals: OrderTotals;
+}) {
+  const { items, order, totals } = input;
+  if (!order.customer_email) return;
+
+  const subject = `訂單確認｜${order.order_number}`;
+  const lines = [
+    `${order.customer_name ?? "您好"}，感謝您的訂購！我們已收到您的訂單。`,
+    `訂單編號：${order.order_number}`,
+    `付款方式：${order.payment_method ?? "-"}`,
+    `配送方式：${order.shipping_method ?? "-"} ${order.shipping_address ?? ""}`.trim(),
+    "",
+    ...items.map((item) => `${item.product_name ?? item.product_slug ?? "商品"} x ${item.quantity ?? 1}｜${formatCurrency((item.unit_price ?? 0) * (item.quantity ?? 1))}`),
+    "",
+    `小計：${formatCurrency(totals.subtotal)}`,
+    `運費：${formatCurrency(totals.shippingFee)}`,
+    `總計：${formatCurrency(totals.total)}`,
+    "",
+    `訂單查詢：${siteUrl}/orders/${order.id}/success`
+  ];
+
+  await sendEmail({
+    html: renderEmailHtml({
+      intro: "我們已收到您的訂單，確認付款後會盡快為您安排出貨。",
+      lines,
+      title: `訂單確認 ${order.order_number}`
+    }),
+    subject,
+    text: lines.join("\n"),
+    to: order.customer_email
+  });
+}
+
 export async function notifyCustomerPaymentConfirmed(input: {
   items: OrderItem[];
   order: OrderRecord;

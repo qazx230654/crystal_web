@@ -1,4 +1,5 @@
 import {
+  notifyCustomerOrderCreated,
   notifyCustomerOrderShipped,
   notifyCustomerPaymentConfirmed,
   notifyStoreOwnerNewOrder,
@@ -17,6 +18,7 @@ export async function notifyNewOrder(input: {
   totals: OrderTotals;
 }) {
   await runNotification(() => notifyStoreOwnerNewOrder(input));
+  await runNotification(() => notifyCustomerOrderCreated(input));
 }
 
 export async function notifyPaymentConfirmed(input: {

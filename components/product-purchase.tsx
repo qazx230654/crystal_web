@@ -18,6 +18,7 @@ export function ProductPurchase({ product }: { product: Product }) {
   const [clasp, setClasp] = useState(claspOptions[0].value);
   const [fit, setFit] = useState(fitOptions[0].value);
   const [quantity, setQuantity] = useState(1);
+  const [showSizeGuide, setShowSizeGuide] = useState(false);
   const { addItem } = useCart();
   const price = product.price + getClaspPriceDelta(clasp);
   const soldOut = !isProductSellable(product);
@@ -29,7 +30,16 @@ export function ProductPurchase({ product }: { product: Product }) {
       <p className="mt-4 text-2xl font-semibold text-crystal-rose">NT$ {price.toLocaleString()}</p>
       <div className="mt-8 space-y-7">
         <fieldset>
-          <legend className="mb-3 font-semibold">手圍尺寸</legend>
+          <div className="mb-3 flex items-center justify-between gap-3">
+            <legend className="font-semibold">手圍尺寸</legend>
+            <button
+              className="text-xs text-crystal-rose underline underline-offset-2 transition hover:text-crystal-gold"
+              onClick={() => setShowSizeGuide((value) => !value)}
+              type="button"
+            >
+              手圍怎麼測量？
+            </button>
+          </div>
           <div className="flex flex-wrap gap-2">
             {braceletSizeOptions.map((item) => (
               <button className={`rounded-full border px-4 py-2 text-sm ${size === item ? "border-crystal-ink bg-crystal-ink text-white" : "border-crystal-line bg-white/72"}`} key={item} onClick={() => setSize(item)} type="button">
@@ -37,6 +47,11 @@ export function ProductPurchase({ product }: { product: Product }) {
               </button>
             ))}
           </div>
+          {showSizeGuide ? (
+            <p className="mt-3 rounded-md border border-crystal-line bg-white/72 p-4 text-sm leading-7 text-crystal-muted">
+              拿軟尺平貼手圍繞一圈。如果沒有軟尺，也可以拿一段棉線或紙條繞手圍，拿筆做記號後，再用一般直尺量那段線的長度。
+            </p>
+          ) : null}
         </fieldset>
         <fieldset>
           <legend className="mb-3 font-semibold">扣件類型</legend>

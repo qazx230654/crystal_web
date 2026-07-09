@@ -1,9 +1,12 @@
 import Image from "next/image";
 import Link from "next/link";
+import { ProductCard } from "@/components/product-card";
 import { ProductPurchase } from "@/components/product-purchase";
+import { Reveal } from "@/components/reveal";
 import { SectionHeading } from "@/components/section-heading";
 import { modules } from "@/config/modules";
 import { findProduct, listRelatedProducts } from "@/services/product-service";
+import { ProductInfoTabs } from "./product-info-tabs";
 
 export const dynamic = "force-dynamic";
 
@@ -36,36 +39,17 @@ export default async function ProductDetailPage({ params }: { params: { slug: st
         {modules.product.purchaseOptions ? <ProductPurchase product={product} /> : null}
       </div>
 
-      <section className="mt-16 grid gap-4 md:grid-cols-4">
-        {["功效說明", "商品內容", "保固與維修", "手圍測量"].map((tab, index) => (
-          <article className="rounded-md border border-crystal-line bg-white/72 p-5" key={tab}>
-            <h3 className="font-semibold">{tab}</h3>
-            <p className="mt-3 text-sm leading-7 text-crystal-muted">
-              {index === 0
-                ? product.description
-                : index === 1
-                  ? `${product.minerals.join("、")}。商品會因手圍不同而有些微變化。`
-                  : index === 2
-                    ? "三個月內免費保固一次，包含換線、五金汰換與損壞維修。"
-                    : "請用皮尺平貼在想戴手鍊的位置，繞一圈即為淨手圍。"}
-            </p>
-          </article>
-        ))}
+      <section className="mt-16">
+        <ProductInfoTabs product={product} />
       </section>
 
       {modules.product.relatedProducts ? <section className="mt-20">
         <SectionHeading eyebrow="You May Also Like" title="相關商品" />
-        <div className="grid gap-5 sm:grid-cols-2">
-          {related.map((item) => (
-            <Link className="flex gap-4 rounded-md border border-crystal-line bg-white/72 p-4" href={`/products/${item.slug}`} key={item.id}>
-              <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-md">
-                <Image alt={item.name} fill className="object-cover" src={item.image} sizes="96px" />
-              </div>
-              <div>
-                <h3 className="font-semibold">{item.name}</h3>
-                <p className="mt-2 text-crystal-rose">NT$ {item.price.toLocaleString()}</p>
-              </div>
-            </Link>
+        <div className="grid gap-x-5 gap-y-10 sm:grid-cols-2 lg:grid-cols-4">
+          {related.map((item, index) => (
+            <Reveal delay={(index % 4) * 80} key={item.id}>
+              <ProductCard product={item} />
+            </Reveal>
           ))}
         </div>
       </section> : null}

@@ -200,18 +200,18 @@ export function Footer() {
       <div className="container-shell grid gap-8 md:grid-cols-[1.4fr_1fr_1fr]">
         <div>
           <Brand />
-          <p className="mt-5 max-w-sm text-sm leading-7 text-crystal-muted">
+          <p className="mt-5 max-w-sm text-xs leading-7 text-crystal-muted">
             專屬你的能量水晶，陪你走向更好的每一天。
           </p>
         </div>
-        <div className="grid gap-3 text-sm text-crystal-muted">
+        <div className="grid gap-3 text-xs  text-crystal-muted">
           <span className="luxury-eyebrow">Explore</span>
           <Link href="/products">所有商品</Link>
           <Link href="/custom">客製化方案</Link>
           <Link href="/order-lookup">訂單查詢</Link>
           <Link href="/shopping-guide">購物說明</Link>
         </div>
-        <div className="grid gap-3 text-sm text-crystal-muted">
+        <div className="grid gap-3 text-xs text-crystal-muted">
           <span className="luxury-eyebrow">Contact</span>
           <Link href="/contact">聯絡我們</Link>
           <a href={contactLinks.instagram.href} rel="noreferrer" target="_blank">

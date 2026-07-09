@@ -66,7 +66,13 @@ export function OrderDetailsPanel({
                   <span>NT$ {(item.unit_price * item.quantity).toLocaleString()}</span>
                 </div>
                 <p className="mt-1 text-crystal-muted">數量 {item.quantity}</p>
-                {item.options ? <p className="mt-1 text-xs text-crystal-muted">{JSON.stringify(item.options)}</p> : null}
+                {item.options && (
+                  <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-xs text-crystal-muted">
+                    {item.options.size && <span>尺寸：{item.options.size} ・</span>}
+                    {item.options.fit && <span>配戴：{item.options.fit} ・</span>}
+                    {item.options.clasp && <span>線材：{item.options.clasp}</span>}
+                  </div>
+                )}
               </div>
             ))}
           </div>
