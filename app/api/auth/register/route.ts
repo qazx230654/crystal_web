@@ -20,7 +20,8 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: { message: "密碼至少需要 8 個字元" } }, { status: 400 });
     }
 
-    const session = await signUpMember({ email, lineId, name, password, phone });
+    const origin = new URL(request.url).origin;
+    const session = await signUpMember({ email, lineId, name, password, phone, redirectTo: origin });
     const response = NextResponse.json({
       data: {
         requiresEmailConfirmation: !session.access_token,

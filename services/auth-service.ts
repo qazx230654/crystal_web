@@ -62,8 +62,10 @@ export async function signUpMember(input: {
   name: string;
   password: string;
   phone?: string;
+  redirectTo?: string;
 }) {
-  const payload = await supabaseAuthRequest<SupabaseAuthSession>("/signup", {
+  const redirectQuery = input.redirectTo ? `?redirect_to=${encodeURIComponent(input.redirectTo)}` : "";
+  const payload = await supabaseAuthRequest<SupabaseAuthSession>(`/signup${redirectQuery}`, {
     body: {
       data: {
         line_id: input.lineId || null,
@@ -107,8 +109,9 @@ export async function signInMember(email: string, password: string) {
   return payload;
 }
 
-export async function resendSignupVerification(email: string) {
-  return supabaseAuthRequest<{ message?: string }>("/resend", {
+export async function resendSignupVerification(email: string, redirectTo?: string) {
+  const redirectQuery = redirectTo ? `?redirect_to=${encodeURIComponent(redirectTo)}` : "";
+  return supabaseAuthRequest<{ message?: string }>(`/resend${redirectQuery}`, {
     body: {
       email,
       type: "signup"

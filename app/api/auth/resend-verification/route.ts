@@ -12,7 +12,8 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: { message: "請先登入會員" } }, { status: 401 });
     }
 
-    await resendSignupVerification(email);
+    const origin = new URL(request.url).origin;
+    await resendSignupVerification(email, origin);
 
     return NextResponse.json({ data: { sent: true } });
   } catch (error) {
