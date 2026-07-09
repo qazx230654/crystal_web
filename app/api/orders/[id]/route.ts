@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getOrderById, updateOrderStatus } from "@/services/order-service";
+import { getOrderById, updateOrderStatus, updateOrderWorkflowAction, type AdminOrderAction } from "@/services/order-service";
 import { SupabaseConfigError } from "@/services/supabase-rest";
 import { requireAdmin } from "@/services/admin-auth";
 
@@ -28,10 +28,18 @@ export async function GET(_request: Request, { params }: { params: { id: string 
 
 export async function PATCH(request: Request, { params }: { params: { id: string } }) {
   try {
-    const unauthorized = requireAdmin(request);
+    const unauthorized = await requireAdmin(request);
     if (unauthorized) return unauthorized;
 
     const payload = await request.json();
+    const action = String(payload.action ?? "") as AdminOrderAction;
+
+    if (action) {
+      const order = await updateOrderWorkflowAction(params.id, action, payload.message);
+
+      return NextResponse.json({ data: order });
+    }
+
     const status = String(payload.status ?? "");
 
     if (!status) {

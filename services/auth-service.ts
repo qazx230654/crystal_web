@@ -13,7 +13,10 @@ export type MemberProfile = {
   line_id?: string | null;
   name?: string | null;
   phone?: string | null;
+  role?: "member" | "vip" | "admin" | string | null;
+  status?: "active" | "disabled" | string | null;
   updated_at?: string;
+  vip_tier?: string | null;
 };
 
 type SupabaseAuthUser = {
@@ -149,6 +152,13 @@ export async function getCurrentMember(request: Request) {
   };
 }
 
+export async function isCurrentMemberAdmin(request: Request) {
+  const member = await getCurrentMember(request);
+  const profile = member?.profile;
+
+  return Boolean(member?.user?.id && profile?.role === "admin" && (profile.status ?? "active") === "active");
+}
+
 export async function getAuthUser(accessToken: string) {
   return supabaseAuthRequest<SupabaseAuthUser>("/user", {
     accessToken,
@@ -187,7 +197,10 @@ export async function saveMemberProfile(profile: MemberProfile) {
   const [created] = await supabaseRest<MemberProfile[]>("profiles", {
     body: {
       ...body,
-      id: profile.id
+      id: profile.id,
+      role: profile.role || "member",
+      status: profile.status || "active",
+      vip_tier: profile.vip_tier || null
     },
     method: "POST"
   });

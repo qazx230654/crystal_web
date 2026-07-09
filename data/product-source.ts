@@ -18,6 +18,7 @@ type SupabaseProductRow = {
   stock_label: string | null;
   sales: number | null;
   created_at: string | null;
+  deleted_at: string | null;
 };
 
 export const products = mockProducts;
@@ -85,6 +86,7 @@ function normalizeSupabaseProduct(row: SupabaseProductRow): Product | null {
     stockLabel: parsedStatus.stockLabel,
     sales: Number(row.sales ?? 0),
     createdAt: row.created_at ?? new Date().toISOString().slice(0, 10),
+    deletedAt: row.deleted_at,
     status: parsedStatus.status
   };
 }
@@ -101,6 +103,7 @@ function filterVisible(productsToFilter: Product[], includeInactive?: boolean) {
   if (includeInactive) return productsToFilter;
 
   return productsToFilter.filter((product) => {
+    if (product.deletedAt) return false;
     const status = product.status ?? "active";
     return status === "active" || status === "soldout";
   });

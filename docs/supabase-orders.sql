@@ -3,6 +3,13 @@ create table if not exists orders (
   user_id uuid references auth.users(id) on delete set null,
   order_number text unique not null,
   status text not null default 'pending',
+  order_status text not null default 'pending',
+  payment_status text not null default 'unpaid',
+  shipping_status text not null default 'pending',
+  logistics_provider text,
+  tracking_number text,
+  logistics_print_url text,
+  shipped_at timestamptz,
   customer_name text not null,
   customer_phone text not null,
   customer_email text,
@@ -26,6 +33,9 @@ create table if not exists profiles (
   name text,
   phone text,
   line_id text,
+  role text not null default 'member',
+  status text not null default 'active',
+  vip_tier text,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );

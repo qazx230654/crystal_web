@@ -9,10 +9,10 @@ export const navLinks = [
 ];
 
 export const categoryHighlights = [
-  { title: "LOVE & ROMANCE", label: "愛情桃花", href: "/products?category=love", icon: Heart },
-  { title: "WEALTH & CAREER", label: "財運事業", href: "/products?category=wealth", icon: WalletCards },
-  { title: "PROTECTION", label: "能量防護", href: "/products?category=protect", icon: Shield },
-  { title: "HEALING", label: "療癒系列", href: "/products?category=healing", icon: Sparkles }
+  { title: "RELATIONSHIP ENERGY", label: "關係與桃花", href: "/products?category=love", icon: Heart },
+  { title: "ABUNDANCE FLOW", label: "財富與事業", href: "/products?category=wealth", icon: WalletCards },
+  { title: "GROUNDING SHIELD", label: "守護與安定", href: "/products?category=protect", icon: Shield },
+  { title: "SOFT HEALING", label: "溫柔療癒", href: "/products?category=healing", icon: Sparkles }
 ];
 
 export const guideSections = [
@@ -56,26 +56,27 @@ export const customPlans = [
     price: "手鍊價格：NT$1,500 ± NT$300",
     href: "/custom/form",
     body: "提供想要的功效、色系與款式，或和店家討論愛情、財運、溝通、療癒等方向。"
-  },
-  {
-    code: "B",
-    title: "塔羅 × 水晶手鍊",
-    price: "手鍊價格：NT$1,500 ± NT$300｜塔羅依價目表 9 折",
-    href: "/custom/form-b",
-    body: "以塔羅解析當下缺失能量，再依解析配置水晶，適合想要更完整能量對話的人。"
-  },
-  {
-    code: "C",
-    title: "脈輪檢測 × 水晶手鍊",
-    price: "手鍊價格：NT$1,500 ± NT$300｜脈輪檢測 NT$500",
-    href: "/custom/form-c",
-    body: "透過七大脈輪能量檢測，找出需要照看的頻率並完成專屬水晶搭配。"
-  },
-  {
-    code: "D",
-    title: "生命靈數 × 水晶手鍊",
-    price: "手鍊價格：NT$1,500 ± NT$300｜生命靈數解析 NT$500",
-    href: "/custom/form-d",
-    body: "從生命數、天賦數、星座數與空缺數切入，強化優勢並溫柔補足缺口。"
   }
+  // ,
+  // {
+  //   code: "B",
+  //   title: "塔羅 × 水晶手鍊",
+  //   price: "手鍊價格：NT$1,500 ± NT$300｜塔羅依價目表 9 折",
+  //   href: "/custom/form-b",
+  //   body: "以塔羅解析當下缺失能量，再依解析配置水晶，適合想要更完整能量對話的人。"
+  // },
+  // {
+  //   code: "C",
+  //   title: "脈輪檢測 × 水晶手鍊",
+  //   price: "手鍊價格：NT$1,500 ± NT$300｜脈輪檢測 NT$500",
+  //   href: "/custom/form-c",
+  //   body: "透過七大脈輪能量檢測，找出需要照看的頻率並完成專屬水晶搭配。"
+  // },
+  // {
+  //   code: "D",
+  //   title: "生命靈數 × 水晶手鍊",
+  //   price: "手鍊價格：NT$1,500 ± NT$300｜生命靈數解析 NT$500",
+  //   href: "/custom/form-d",
+  //   body: "從生命數、天賦數、星座數與空缺數切入，強化優勢並溫柔補足缺口。"
+  // }
 ];

@@ -5,11 +5,12 @@ import { requireAdmin } from "@/services/admin-auth";
 import { listProducts } from "@/services/product-service";
 import { getProductFormOptions } from "@/services/admin-product-store";
 import { createSupabaseProduct } from "@/services/supabase-product-service";
+import { validateProductPayload } from "@/services/product-validation";
 
 export const dynamic = "force-dynamic";
 
 export async function GET(request: Request) {
-  const unauthorized = requireAdmin(request);
+  const unauthorized = await requireAdmin(request);
   if (unauthorized) return unauthorized;
 
   const products = await listProducts({ includeInactive: true, sort: "最新商品" });
@@ -27,7 +28,7 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
-  const unauthorized = requireAdmin(request);
+  const unauthorized = await requireAdmin(request);
   if (unauthorized) return unauthorized;
 
   try {
@@ -46,30 +47,17 @@ export async function POST(request: Request) {
       stockLabel?: string;
     };
 
-    if (!payload.name?.trim()) {
-      return NextResponse.json({ error: { message: "請輸入商品名稱" } }, { status: 400 });
-    }
-    if (!payload.image?.trim()) {
-      return NextResponse.json({ error: { message: "請輸入商品主圖" } }, { status: 400 });
-    }
-    if (!payload.category?.length) {
-      return NextResponse.json({ error: { message: "請至少勾選一個分類" } }, { status: 400 });
-    }
-    if (!payload.minerals?.length) {
-      return NextResponse.json({ error: { message: "請至少勾選一種礦石" } }, { status: 400 });
-    }
-    if (!payload.price || Number(payload.price) <= 0) {
-      return NextResponse.json({ error: { message: "請輸入正確的折扣價格" } }, { status: 400 });
-    }
+    const validationError = validateProductPayload(payload);
+    if (validationError) return validationError;
 
     const product = await createSupabaseProduct({
       benefits: payload.benefits ?? [],
-      category: payload.category,
+      category: payload.category ?? [],
       description: payload.description ?? "",
-      image: payload.image,
+      image: payload.image ?? "",
       images: payload.images?.filter(Boolean) ?? [],
-      minerals: payload.minerals,
-      name: payload.name,
+      minerals: payload.minerals ?? [],
+      name: payload.name ?? "",
       originalPrice: payload.originalPrice ? Number(payload.originalPrice) : undefined,
       price: Number(payload.price),
       slug: payload.slug,

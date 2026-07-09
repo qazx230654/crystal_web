@@ -22,7 +22,7 @@ export async function GET(request: Request) {
       return NextResponse.json({ data: result });
     }
 
-    const unauthorized = requireAdmin(request);
+    const unauthorized = await requireAdmin(request);
     if (unauthorized) return unauthorized;
 
     const orders = await listOrders();

@@ -3,6 +3,19 @@
 import Link from "next/link";
 import { FormEvent, useState } from "react";
 
+const statusLabels: Record<string, string> = {
+  cancelled: "已取消",
+  completed: "已完成",
+  making: "備貨中",
+  paid: "待出貨",
+  pending: "待付款",
+  shipped: "已出貨"
+};
+
+function getOrderStatus(order: any) {
+  return order.order_status || order.status || "pending";
+}
+
 export default function OrderLookupPage() {
   const [result, setResult] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
@@ -53,7 +66,7 @@ export default function OrderLookupPage() {
               <p className="text-sm text-crystal-muted">訂單編號</p>
               <h2 className="mt-1 text-3xl font-semibold text-crystal-rose">{result.order.order_number}</h2>
               <div className="mt-6 grid gap-3 text-sm">
-                <p>狀態：{result.order.status}</p>
+                <p>狀態：{statusLabels[getOrderStatus(result.order)] ?? getOrderStatus(result.order)}</p>
                 <p>總計：NT$ {result.order.total.toLocaleString()}</p>
                 <p>建立時間：{new Date(result.order.created_at).toLocaleString("zh-TW")}</p>
               </div>

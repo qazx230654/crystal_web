@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { contactLinks } from "@/config/contact";
-import { getOrderById } from "@/services/order-service";
+import { getOrderById, getOrderStatus, getPaymentStatus, getShippingStatus, orderStatusLabels, paymentStatusLabels, shippingStatusLabels } from "@/services/order-service";
 
 export const dynamic = "force-dynamic";
 
@@ -47,7 +47,9 @@ export default async function OrderSuccessPage({ params }: { params: { id: strin
         <aside className="rounded-md border border-crystal-line bg-white/72 p-6 shadow-soft">
           <h2 className="text-2xl font-semibold">付款資訊</h2>
           <dl className="mt-5 grid gap-3 text-sm">
-            <div className="flex justify-between"><dt className="text-crystal-muted">狀態</dt><dd>{order.status}</dd></div>
+            <div className="flex justify-between"><dt className="text-crystal-muted">訂單狀態</dt><dd>{orderStatusLabels[getOrderStatus(order)] ?? getOrderStatus(order)}</dd></div>
+            <div className="flex justify-between"><dt className="text-crystal-muted">金流狀態</dt><dd>{paymentStatusLabels[getPaymentStatus(order)] ?? getPaymentStatus(order)}</dd></div>
+            <div className="flex justify-between"><dt className="text-crystal-muted">物流狀態</dt><dd>{shippingStatusLabels[getShippingStatus(order)] ?? getShippingStatus(order)}</dd></div>
             <div className="flex justify-between"><dt className="text-crystal-muted">付款方式</dt><dd>{order.payment_method}</dd></div>
             <div className="flex justify-between"><dt className="text-crystal-muted">運費</dt><dd>NT$ {order.shipping_fee.toLocaleString()}</dd></div>
             <div className="flex justify-between text-lg font-semibold"><dt>總計</dt><dd>NT$ {order.total.toLocaleString()}</dd></div>

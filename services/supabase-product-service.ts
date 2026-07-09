@@ -18,7 +18,9 @@ type SupabaseProductInsert = {
   created_at?: string;
 };
 
-export async function createSupabaseProduct(input: {
+type SupabaseProductUpdate = Omit<SupabaseProductInsert, "created_at" | "sales">;
+
+export type SupabaseProductInput = {
   benefits: string[];
   category: Category[];
   description: string;
@@ -31,7 +33,9 @@ export async function createSupabaseProduct(input: {
   slug?: string;
   status: ProductStatus;
   stockLabel: string;
-}) {
+};
+
+export async function createSupabaseProduct(input: SupabaseProductInput) {
   const slug = normalizeSlug(input.slug || input.name);
   const payload: SupabaseProductInsert = {
     slug,
@@ -57,6 +61,35 @@ export async function createSupabaseProduct(input: {
   return product;
 }
 
+export async function updateSupabaseProduct(id: string, input: SupabaseProductInput) {
+  const slug = normalizeSlug(input.slug || input.name);
+  const payload: SupabaseProductUpdate = {
+    slug,
+    name: input.name.trim(),
+    price: Number(input.price),
+    original_price: input.originalPrice ? Number(input.originalPrice) : null,
+    category: input.category,
+    minerals: input.minerals,
+    benefits: input.benefits,
+    image: input.image.trim(),
+    images: input.images.length ? input.images : [input.image.trim()],
+    description: input.description.trim(),
+    stock_label: encodeStoredStockLabel(input.stockLabel, input.status)
+  };
+
+  const [product] = await supabaseRest<Array<{ id: string } & SupabaseProductUpdate>>("products", {
+    body: payload,
+    method: "PATCH",
+    query: `?id=eq.${encodeURIComponent(id)}`
+  });
+
+  if (!product) {
+    throw new Error("找不到要更新的商品。");
+  }
+
+  return product;
+}
+
 export async function updateSupabaseProductStatus(id: string, status: ProductStatus) {
   const [current] = await supabaseRest<Array<{ id: string; stock_label: string | null }>>("products", {
     query: `?id=eq.${encodeURIComponent(id)}&select=id,stock_label`
@@ -74,6 +107,34 @@ export async function updateSupabaseProductStatus(id: string, status: ProductSta
   });
 
   return updated;
+}
+
+export async function archiveSupabaseProduct(id: string) {
+  const [product] = await supabaseRest<Array<{ id: string; deleted_at: string | null }>>("products", {
+    body: { deleted_at: new Date().toISOString() },
+    method: "PATCH",
+    query: `?id=eq.${encodeURIComponent(id)}`
+  });
+
+  if (!product) {
+    throw new Error("找不到要封存的商品。");
+  }
+
+  return product;
+}
+
+export async function restoreSupabaseProduct(id: string) {
+  const [product] = await supabaseRest<Array<{ id: string; deleted_at: string | null }>>("products", {
+    body: { deleted_at: null },
+    method: "PATCH",
+    query: `?id=eq.${encodeURIComponent(id)}`
+  });
+
+  if (!product) {
+    throw new Error("找不到要解除封存的商品。");
+  }
+
+  return product;
 }
 
 function normalizeSlug(value: string) {

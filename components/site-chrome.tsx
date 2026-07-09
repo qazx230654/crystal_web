@@ -1,8 +1,9 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { ChevronDown, Menu, Search, ShoppingBag, User, X } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { navLinks } from "@/data/site";
 import { Brand } from "@/components/brand";
 import { CartDrawer } from "@/components/cart-drawer";
@@ -18,10 +19,10 @@ function AnnouncementMarquee() {
   }
 
   return (
-    <div className="overflow-hidden border-b border-crystal-line/70 bg-crystal-ink py-2 text-[11px] font-medium tracking-[0.18em] text-crystal-cream">
+    <div className="overflow-hidden border-b border-crystal-gold/25 bg-white/92 py-2 text-[11px] font-medium tracking-[0.18em] text-crystal-gold">
       <div className="marquee-track flex w-max gap-12">
-        {Array.from({ length: 8 }).map((_, index) => (
-          <span key={index}>任選兩件商品免運 · 6/1-6/10 全面九折 ·</span>
+        {Array.from({ length: 16 }).map((_, index) => (
+          <span key={index}>任選兩件商品免運 · 天然晶石手作配置 · Crystal Energy ·</span>
         ))}
       </div>
     </div>
@@ -29,6 +30,7 @@ function AnnouncementMarquee() {
 }
 
 function Header() {
+  const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
   const [categoryOpen, setCategoryOpen] = useState(false);
   const { lines, openCart } = useCart();
@@ -43,26 +45,32 @@ function Header() {
   ];
   const visibleNavLinks = navLinks.filter((link) => !["水晶創業班", "訂單查詢"].includes(link.label));
 
+  useEffect(() => {
+    setCategoryOpen(false);
+    setMenuOpen(false);
+  }, [pathname]);
+
   return (
     <>
-      <header className="sticky top-0 z-40 border-b border-crystal-line/80 bg-crystal-cream/88 backdrop-blur-xl">
+      <header className="sticky top-0 z-40 border-b border-crystal-gold/20 bg-crystal-cream/88 shadow-[0_10px_30px_rgba(90,65,55,0.04)] backdrop-blur-xl">
         <div className="container-shell relative z-20 flex h-16 items-center justify-between gap-4">
           <Brand />
           <nav className="hidden items-center gap-7 text-xs font-medium tracking-[0.08em] text-crystal-muted lg:flex">
-            <Link className="hover:text-crystal-ink" href="/products?category=monthly">
+            <Link className="transition hover:text-crystal-gold" href="/products?category=monthly" onClick={() => setCategoryOpen(false)}>
               每月限量
             </Link>
             <div className="relative">
               <button
-                className="hover:text-crystal-ink"
+                className="inline-flex items-center gap-1.5 transition hover:text-crystal-gold"
                 onClick={() => setCategoryOpen((value) => !value)}
                 type="button"
               >
                 商品分類
+                <ChevronDown className={`transition ${categoryOpen ? "rotate-180" : ""}`} size={13} />
               </button>
               {categoryOpen ? (
-                <div className="absolute left-1/2 top-9 z-50 w-60 -translate-x-1/2 border border-crystal-line bg-white shadow-soft">
-                  <div className="border-b border-crystal-line px-5 py-4 text-[10px] font-bold uppercase tracking-[0.26em] text-crystal-muted">
+                <div className="absolute left-1/2 top-9 z-50 w-60 -translate-x-1/2 border border-crystal-champagne/80 bg-white/95 shadow-soft backdrop-blur">
+                  <div className="border-b border-crystal-champagne/70 px-5 py-4 text-[10px] font-bold uppercase tracking-[0.26em] text-crystal-gold">
                     Shop by Category
                   </div>
                   <div className="grid">
@@ -80,7 +88,7 @@ function Header() {
                         <span className="text-crystal-muted">→</span>
                       </Link>
                     ))}
-                    <button
+                    {/* <button
                       className="flex items-center justify-between px-5 py-4 text-left text-sm text-crystal-muted"
                       type="button"
                     >
@@ -89,13 +97,13 @@ function Header() {
                         <span className="mt-1 block text-[11px] text-crystal-muted">Coming later</span>
                       </span>
                       <ChevronDown size={15} />
-                    </button>
+                    </button> */}
                   </div>
                 </div>
               ) : null}
             </div>
             {visibleNavLinks.slice(1).map((link) => (
-              <Link className="hover:text-crystal-ink" href={link.href} key={link.href}>
+              <Link className="transition hover:text-crystal-gold" href={link.href} key={link.href} onClick={() => setCategoryOpen(false)}>
                 {link.label}
               </Link>
             ))}
@@ -103,7 +111,7 @@ function Header() {
           <div className="flex items-center gap-2">
             {modules.chrome.searchShortcut ? (
               <Link
-                className="hidden h-9 w-9 place-items-center rounded-full border border-crystal-line bg-white/70 text-crystal-muted transition hover:text-crystal-ink md:grid"
+                className="hidden h-9 w-9 place-items-center rounded-full border border-crystal-line bg-white/70 text-crystal-muted transition hover:border-crystal-gold hover:text-crystal-gold md:grid"
                 href="/products"
                 title="搜尋商品"
               >
@@ -112,7 +120,7 @@ function Header() {
             ) : null}
             {modules.chrome.authShortcut ? (
               <Link
-                className="hidden h-9 w-9 place-items-center rounded-full border border-crystal-line bg-white/70 text-crystal-muted transition hover:text-crystal-ink md:grid"
+                className="hidden h-9 w-9 place-items-center rounded-full border border-crystal-line bg-white/70 text-crystal-muted transition hover:border-crystal-gold hover:text-crystal-gold md:grid"
                 href={accountHref}
                 title={accountTitle}
               >
@@ -121,14 +129,14 @@ function Header() {
             ) : null}
             {modules.chrome.cart ? (
               <button
-                className="relative grid h-9 w-9 place-items-center rounded-full border border-crystal-line bg-white/70 text-crystal-muted transition hover:text-crystal-ink"
+                className="relative grid h-9 w-9 place-items-center rounded-full border border-crystal-line bg-white/70 text-crystal-muted transition hover:border-crystal-gold hover:text-crystal-gold"
                 onClick={openCart}
                 title="購物車"
                 type="button"
               >
                 <ShoppingBag size={18} />
                 {count ? (
-                  <span className="absolute -right-1 -top-1 grid h-5 min-w-5 place-items-center rounded-full bg-crystal-rose px-1 text-[11px] font-bold text-white">
+                  <span className="absolute -right-1 -top-1 grid h-5 min-w-5 place-items-center rounded-full bg-crystal-gold px-1 text-[11px] font-bold text-white">
                     {count}
                   </span>
                 ) : null}
@@ -181,23 +189,23 @@ function Header() {
 
 function Footer() {
   return (
-    <footer className="mt-24 border-t border-crystal-line bg-white/50 py-12">
+    <footer className="mt-24 border-t border-crystal-gold/20 bg-white/50 py-12">
       <div className="container-shell grid gap-8 md:grid-cols-[1.4fr_1fr_1fr]">
         <div>
           <Brand />
           <p className="mt-5 max-w-sm text-sm leading-7 text-crystal-muted">
-            結合能量水晶、情緒療癒與個人轉運，讓每一天都成為好日子。
+            專屬你的能量水晶，陪你走向更好的每一天。
           </p>
         </div>
         <div className="grid gap-3 text-sm text-crystal-muted">
-          <span className="text-xs font-bold uppercase tracking-[0.24em] text-crystal-rose">Explore</span>
+          <span className="luxury-eyebrow">Explore</span>
           <Link href="/products">所有商品</Link>
           <Link href="/custom">客製化方案</Link>
           <Link href="/order-lookup">訂單查詢</Link>
           <Link href="/shopping-guide">購物說明</Link>
         </div>
         <div className="grid gap-3 text-sm text-crystal-muted">
-          <span className="text-xs font-bold uppercase tracking-[0.24em] text-crystal-rose">Contact</span>
+          <span className="luxury-eyebrow">Contact</span>
           <Link href="/contact">聯絡我們</Link>
           <a href={contactLinks.instagram.href} rel="noreferrer" target="_blank">
             Instagram

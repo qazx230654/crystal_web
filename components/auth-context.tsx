@@ -9,6 +9,9 @@ type Member = {
     line_id?: string | null;
     name?: string | null;
     phone?: string | null;
+    role?: string | null;
+    status?: string | null;
+    vip_tier?: string | null;
   } | null;
   user: {
     email?: string;

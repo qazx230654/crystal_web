@@ -26,6 +26,7 @@ export type Product = {
   stockLabel: string;
   sales: number;
   createdAt: string;
+  deletedAt?: string | null;
   status?: ProductStatus;
 };
 

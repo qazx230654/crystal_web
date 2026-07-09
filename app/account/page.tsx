@@ -4,10 +4,12 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FormEvent, useEffect, useState } from "react";
 import { useAuth } from "@/components/auth-context";
+import { Button } from "@/components/ui/button";
 
 type AccountOrder = {
   created_at: string;
   id: string;
+  order_status?: string | null;
   order_number: string;
   status: string;
   total: number;
@@ -16,14 +18,18 @@ type AccountOrder = {
 const statusLabels: Record<string, string> = {
   cancelled: "已取消",
   completed: "已完成",
-  making: "製作中",
-  paid: "已付款",
-  pending: "待確認",
+  making: "備貨中",
+  paid: "待出貨",
+  pending: "待付款",
   shipped: "已出貨"
 };
 
-function getStatusLabel(status: string) {
-  return statusLabels[status] ?? status;
+function getOrderStatus(order: AccountOrder) {
+  return (order as any).order_status || order.status || "pending";
+}
+
+function getStatusLabel(status?: string) {
+  return status ? statusLabels[status] ?? status : "-";
 }
 
 export default function AccountPage() {
@@ -125,6 +131,7 @@ export default function AccountPage() {
   const metadataName = typeof member.user.user_metadata?.name === "string" ? member.user.user_metadata.name : "";
   const displayName = profile?.name || metadataName || email.split("@")[0] || "會員";
   const emailVerified = Boolean(member.user.email_confirmed_at);
+  const isAdmin = profile?.role === "admin" && (profile.status ?? "active") === "active";
 
   return (
     <section className="bg-[#f8f5f2] pb-20">
@@ -135,9 +142,16 @@ export default function AccountPage() {
             <h1 className="mt-2 text-2xl font-semibold text-crystal-ink">歡迎回來，{displayName}</h1>
             <p className="mt-1 text-sm text-crystal-muted">{email}</p>
           </div>
-          <button className="border border-crystal-line bg-white px-5 py-3 text-sm text-crystal-muted transition hover:border-crystal-ink hover:text-crystal-ink" onClick={handleLogout} type="button">
-            登出
-          </button>
+          <div className="flex flex-wrap justify-end gap-2">
+            {isAdmin ? (
+              <Button asChild size="sm" variant="outline">
+                <Link href="/admin/dashboard">後台</Link>
+              </Button>
+            ) : null}
+            <Button onClick={handleLogout} size="sm" type="button" variant="outline">
+              登出
+            </Button>
+          </div>
         </div>
       </div>
 
@@ -157,16 +171,16 @@ export default function AccountPage() {
         {error ? <p className="mt-6 border border-red-200 bg-red-50 p-4 text-sm text-red-700">{error}</p> : null}
         {message ? <p className="mt-6 border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-700">{message}</p> : null}
 
-        <div className="mt-8 border-b border-crystal-line">
+        <div className="mt-8 flex gap-2 border-b border-crystal-line">
           <button
-            className={`px-6 py-4 text-sm ${activeTab === "orders" ? "border-b-2 border-crystal-ink text-crystal-ink" : "text-crystal-muted"}`}
+            className={`border-b px-4 py-3 text-xs font-semibold tracking-[0.08em] transition ${activeTab === "orders" ? "border-crystal-gold bg-crystal-champagne/35 text-crystal-ink" : "border-transparent text-crystal-muted hover:border-crystal-gold/60 hover:text-crystal-ink"}`}
             onClick={() => setActiveTab("orders")}
             type="button"
           >
             我的訂單
           </button>
           <button
-            className={`px-6 py-4 text-sm ${activeTab === "settings" ? "border-b-2 border-crystal-ink text-crystal-ink" : "text-crystal-muted"}`}
+            className={`border-b px-4 py-3 text-xs font-semibold tracking-[0.08em] transition ${activeTab === "settings" ? "border-crystal-gold bg-crystal-champagne/35 text-crystal-ink" : "border-transparent text-crystal-muted hover:border-crystal-gold/60 hover:text-crystal-ink"}`}
             onClick={() => setActiveTab("settings")}
             type="button"
           >
@@ -192,7 +206,7 @@ export default function AccountPage() {
                   <Link className="grid gap-2 px-5 py-4 text-sm md:grid-cols-[1fr_0.8fr_0.7fr_0.7fr]" href={`/orders/${order.id}/success`} key={order.id}>
                     <span className="font-semibold">{order.order_number}</span>
                     <span className="text-crystal-muted">{new Date(order.created_at).toLocaleDateString("zh-TW")}</span>
-                    <span>{getStatusLabel(order.status)}</span>
+                    <span>{getStatusLabel(getOrderStatus(order))}</span>
                     <span className="font-semibold md:text-right">NT$ {order.total.toLocaleString()}</span>
                   </Link>
                 ))}
