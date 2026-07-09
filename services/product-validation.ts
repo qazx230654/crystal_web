@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import type { Category, ProductStatus } from "@/data/product-types";
+import type { Category, ProductStatus } from "@/src/domain/product";
 
 export type AdminProductPayload = {
   benefits?: string[];

@@ -1,5 +1,5 @@
-import { getProduct, getProducts } from "@/data/products";
-import { categoryLabels, type Category, type Product } from "@/data/product-types";
+import { findProductBySlug, getProduct, getProducts } from "@/data/products";
+import { productCategoryLabels, type Category, type Product } from "@/src/domain/product";
 
 export const productSortOptions = ["銷售量", "價格低到高", "價格高到低", "最新商品"] as const;
 
@@ -26,6 +26,10 @@ export async function findProduct(slug: string) {
   return getProduct(slug);
 }
 
+export async function findProductStrict(slug: string, options?: { includeInactive?: boolean }) {
+  return findProductBySlug(slug, options);
+}
+
 export async function listRelatedProducts(slug: string, limit = 2) {
   const [product, products] = await Promise.all([findProduct(slug), getProducts()]);
   return products.filter((item) => item.id !== product.id).slice(0, limit);
@@ -34,7 +38,7 @@ export async function listRelatedProducts(slug: string, limit = 2) {
 export async function listCategories(): Promise<CategorySummary[]> {
   const products = await getProducts();
 
-  return Object.entries(categoryLabels).map(([id, label]) => ({
+  return Object.entries(productCategoryLabels).map(([id, label]) => ({
     id: id as Category | "all",
     label,
     count:

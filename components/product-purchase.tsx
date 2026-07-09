@@ -2,19 +2,25 @@
 
 import { Minus, Plus } from "lucide-react";
 import { useState } from "react";
-import type { Product } from "@/data/products";
 import { useCart } from "@/components/cart-context";
-
-const sizes = ["13 cm", "13.5 cm", "14 cm", "14.5 cm", "15 cm", "15.5 cm", "16 cm", "16.5 cm", "17 cm"];
+import {
+  braceletSizeOptions,
+  claspOptions,
+  defaultBraceletSize,
+  fitOptions,
+  getClaspPriceDelta,
+  isProductSellable,
+  type Product
+} from "@/src/domain/product";
 
 export function ProductPurchase({ product }: { product: Product }) {
-  const [size, setSize] = useState(sizes[4]);
-  const [clasp, setClasp] = useState("彈力繩");
-  const [fit, setFit] = useState("剛好");
+  const [size, setSize] = useState(defaultBraceletSize);
+  const [clasp, setClasp] = useState(claspOptions[0].value);
+  const [fit, setFit] = useState(fitOptions[0].value);
   const [quantity, setQuantity] = useState(1);
   const { addItem } = useCart();
-  const price = product.price + (clasp === "龍蝦扣" ? 200 : 0);
-  const soldOut = product.status === "soldout";
+  const price = product.price + getClaspPriceDelta(clasp);
+  const soldOut = !isProductSellable(product);
 
   return (
     <div>
@@ -25,7 +31,7 @@ export function ProductPurchase({ product }: { product: Product }) {
         <fieldset>
           <legend className="mb-3 font-semibold">手圍尺寸</legend>
           <div className="flex flex-wrap gap-2">
-            {sizes.map((item) => (
+            {braceletSizeOptions.map((item) => (
               <button className={`rounded-full border px-4 py-2 text-sm ${size === item ? "border-crystal-ink bg-crystal-ink text-white" : "border-crystal-line bg-white/72"}`} key={item} onClick={() => setSize(item)} type="button">
                 {item}
               </button>
@@ -35,9 +41,9 @@ export function ProductPurchase({ product }: { product: Product }) {
         <fieldset>
           <legend className="mb-3 font-semibold">扣件類型</legend>
           <div className="flex flex-wrap gap-2">
-            {["彈力繩", "龍蝦扣"].map((item) => (
-              <button className={`rounded-md border px-4 py-3 text-sm ${clasp === item ? "border-crystal-ink bg-crystal-ink text-white" : "border-crystal-line bg-white/72"}`} key={item} onClick={() => setClasp(item)} type="button">
-                {item} {item === "龍蝦扣" ? "+NT$200" : ""}
+            {claspOptions.map((option) => (
+              <button className={`rounded-md border px-4 py-3 text-sm ${clasp === option.value ? "border-crystal-ink bg-crystal-ink text-white" : "border-crystal-line bg-white/72"}`} key={option.value} onClick={() => setClasp(option.value)} type="button">
+                {option.label} {option.priceDelta ? `+NT$${option.priceDelta}` : ""}
               </button>
             ))}
           </div>
@@ -46,10 +52,10 @@ export function ProductPurchase({ product }: { product: Product }) {
         <fieldset>
           <legend className="mb-3 font-semibold">鬆緊度</legend>
           <div className="grid gap-2 sm:grid-cols-2">
-            {["剛好", "微鬆"].map((item) => (
-              <button className={`rounded-md border p-4 text-left ${fit === item ? "border-crystal-ink bg-white" : "border-crystal-line bg-white/60"}`} key={item} onClick={() => setFit(item)} type="button">
-                <span className="block font-semibold">{item}</span>
-                <span className="mt-1 block text-sm text-crystal-muted">{item === "剛好" ? "會有水晶壓痕但不掐肉" : "可輕微滑動"}</span>
+            {fitOptions.map((option) => (
+              <button className={`rounded-md border p-4 text-left ${fit === option.value ? "border-crystal-ink bg-white" : "border-crystal-line bg-white/60"}`} key={option.value} onClick={() => setFit(option.value)} type="button">
+                <span className="block font-semibold">{option.label}</span>
+                <span className="mt-1 block text-sm text-crystal-muted">{option.note}</span>
               </button>
             ))}
           </div>

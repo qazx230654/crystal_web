@@ -7,19 +7,14 @@ import { Check, MessageCircle } from "lucide-react";
 import { useCart } from "@/components/cart-context";
 import { contactLinks } from "@/config/contact";
 import { mockProducts } from "@/data/mock-products";
-
-const tarotTopics = [
-  "戀愛指南",
-  "感情復合",
-  "緣來暗戀",
-  "旺桃花運",
-  "財富密碼",
-  "進化人生",
-  "流年運勢",
-  "守護神",
-  "職涯探索",
-  "心靈療癒"
-];
+import {
+  customStringOptions,
+  fitOptions,
+  metalToneOptions,
+  pendantOptions,
+  tarotTopicOptions,
+  yesNoOptions
+} from "@/src/domain/product";
 
 const braceletImages = [
   "https://goodaytarot.com/images/d-design/d005.jpg",
@@ -32,12 +27,6 @@ const chainImages = [
 ];
 
 const pendantImage = "https://goodaytarot.com/images/workshop-products.jpg";
-
-const stringImages = [
-  { label: "龍蝦扣", note: "+200元", image: "https://goodaytarot.com/images/d-design/d004.jpg" },
-  { label: "磁扣", note: "+200元", image: "https://goodaytarot.com/images/d-design/d005.jpg" },
-  { label: "彈力繩", note: "免費", image: "https://goodaytarot.com/images/d-design/d001.jpg" }
-];
 
 function FormSection({
   title,
@@ -88,12 +77,12 @@ function ChoiceButton({
 }
 
 export function CustomForm({ planCode }: { planCode: string }) {
-  const [tightness, setTightness] = useState("剛好");
-  const [metal, setMetal] = useState("都可以");
-  const [chain, setChain] = useState("不要");
-  const [beadFrame, setBeadFrame] = useState("不要");
-  const [stringType, setStringType] = useState("彈力繩");
-  const [pendant, setPendant] = useState("不要吊飾");
+  const [tightness, setTightness] = useState(fitOptions[0].value);
+  const [metal, setMetal] = useState(metalToneOptions[2].value);
+  const [chain, setChain] = useState(yesNoOptions[1].value);
+  const [beadFrame, setBeadFrame] = useState(yesNoOptions[1].value);
+  const [stringType, setStringType] = useState(customStringOptions[2].label);
+  const [pendant, setPendant] = useState(pendantOptions[1].value);
   const [submitted, setSubmitted] = useState(false);
   const { addItem } = useCart();
   const product = mockProducts.find((item) => item.slug === "custom-deposit-product") ?? mockProducts[0];
@@ -104,13 +93,13 @@ export function CustomForm({ planCode }: { planCode: string }) {
       onSubmit={(event) => {
         event.preventDefault();
         setSubmitted(true);
-        addItem(product, { plan: planCode, tightness, metal, chain, beadFrame, stringType, pendant });
+        addItem(product, undefined, { plan: planCode, tightness, metal, chain, beadFrame, stringType, pendant });
       }}
     >
       {planCode === "B" ? (
         <FormSection body="選擇想占卜的主題後，店家會依照解析結果規劃水晶配置。" title="1. 想占卜哪個主題？">
           <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-            {tarotTopics.map((topic) => (
+            {tarotTopicOptions.map((topic) => (
               <button className="border border-crystal-line bg-white p-4 text-left transition hover:border-crystal-rose" key={topic} type="button">
                 <span className="block font-semibold">{topic}</span>
                 <span className="mt-1 block text-sm text-crystal-muted">點選查看內容</span>
@@ -134,25 +123,26 @@ export function CustomForm({ planCode }: { planCode: string }) {
 
       <FormSection body="這會影響手鍊的實際製作尺寸。" title="3. 手圍的鬆緊偏好？">
         <div className="grid gap-3 sm:grid-cols-2">
-          <ChoiceButton active={tightness === "剛好"} label="剛好" note="會有水晶壓痕但不掐肉，手鍊緊貼手腕。" onClick={() => setTightness("剛好")} />
-          <ChoiceButton active={tightness === "微鬆"} label="微鬆" note="可輕微滑動，戴起來較為舒適寬鬆。" onClick={() => setTightness("微鬆")} />
+          {fitOptions.map((option) => (
+            <ChoiceButton active={tightness === option.value} key={option.value} label={option.label} note={option.value === "剛好" ? "會有水晶壓痕但不掐肉，手鍊緊貼手腕。" : "可輕微滑動，戴起來較為舒適寬鬆。"} onClick={() => setTightness(option.value)} />
+          ))}
         </div>
       </FormSection>
 
       <FormSection body="這會影響配件（銀管、珠框等）的材質選擇。" title="4. 喜歡金飾還是銀飾？">
         <div className="grid gap-3 sm:grid-cols-3">
-          {["金飾", "銀飾"].map((item, index) => (
+          {metalToneOptions.slice(0, 2).map((option, index) => (
             <button
-              className={`overflow-hidden border transition ${metal === item ? "border-crystal-ink bg-crystal-pearl" : "border-crystal-line bg-white hover:border-crystal-rose"}`}
-              key={item}
-              onClick={() => setMetal(item)}
+              className={`overflow-hidden border transition ${metal === option.value ? "border-crystal-ink bg-crystal-pearl" : "border-crystal-line bg-white hover:border-crystal-rose"}`}
+              key={option.value}
+              onClick={() => setMetal(option.value)}
               type="button"
             >
-              <Image alt={item} className="h-32 w-full object-cover" height={240} src={braceletImages[index]} width={360} />
-              <span className="block p-3 text-sm">{item}</span>
+              <Image alt={option.label} className="h-32 w-full object-cover" height={240} src={braceletImages[index]} width={360} />
+              <span className="block p-3 text-sm">{option.label}</span>
             </button>
           ))}
-          <ChoiceButton active={metal === "都可以"} label="都可以" onClick={() => setMetal("都可以")} />
+          <ChoiceButton active={metal === metalToneOptions[2].value} label={metalToneOptions[2].label} onClick={() => setMetal(metalToneOptions[2].value)} />
         </div>
       </FormSection>
 
@@ -166,16 +156,16 @@ export function CustomForm({ planCode }: { planCode: string }) {
           <div>
             <p className="mb-3 font-semibold">銀管</p>
             <div className="grid grid-cols-2 gap-3">
-              {["要", "不要"].map((item) => (
-                <ChoiceButton active={chain === item} key={item} label={item} onClick={() => setChain(item)} />
+              {yesNoOptions.map((option) => (
+                <ChoiceButton active={chain === option.value} key={option.value} label={option.label} onClick={() => setChain(option.value)} />
               ))}
             </div>
           </div>
           <div>
             <p className="mb-3 font-semibold">珠框</p>
             <div className="grid grid-cols-2 gap-3">
-              {["要", "不要"].map((item) => (
-                <ChoiceButton active={beadFrame === item} key={item} label={item} onClick={() => setBeadFrame(item)} />
+              {yesNoOptions.map((option) => (
+                <ChoiceButton active={beadFrame === option.value} key={option.value} label={option.label} onClick={() => setBeadFrame(option.value)} />
               ))}
             </div>
           </div>
@@ -184,7 +174,7 @@ export function CustomForm({ planCode }: { planCode: string }) {
 
       <FormSection body="預設為彈力繩；若更換扣具需額外加收 200 元。" title="6. 要換龍蝦扣或磁扣嗎？">
         <div className="grid gap-3 sm:grid-cols-3">
-          {stringImages.map((item) => (
+          {customStringOptions.map((item) => (
             <button
               className={`border bg-white transition ${stringType === item.label ? "border-crystal-ink" : "border-crystal-line hover:border-crystal-rose"}`}
               key={item.label}
@@ -205,8 +195,8 @@ export function CustomForm({ planCode }: { planCode: string }) {
       <FormSection body="可加掛於手鍊上，請選擇是否需要，細節可下單後與店家討論。" title="7. 要加吊飾嗎？">
         <Image alt="吊飾示意" className="mb-4 h-56 w-full border border-crystal-line object-cover" height={360} src={pendantImage} width={720} />
         <div className="grid gap-3 sm:grid-cols-2">
-          {["要加吊飾", "不要吊飾"].map((item) => (
-            <ChoiceButton active={pendant === item} key={item} label={item} onClick={() => setPendant(item)} />
+          {pendantOptions.map((option) => (
+            <ChoiceButton active={pendant === option.value} key={option.value} label={option.label} onClick={() => setPendant(option.value)} />
           ))}
         </div>
       </FormSection>

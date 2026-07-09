@@ -1,4 +1,4 @@
-import type { Product } from "@/data/product-types";
+import type { Product } from "@/src/domain/product";
 
 export const mockProducts: Product[] = [
   {

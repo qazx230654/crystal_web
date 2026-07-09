@@ -2,8 +2,8 @@
 
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useEffect, useRef } from "react";
-import type { Product } from "@/data/products";
 import { ProductCard } from "@/components/product-card";
+import type { Product } from "@/src/domain/product";
 
 export function FeaturedProductsCarousel({ products }: { products: Product[] }) {
   const trackRef = useRef<HTMLDivElement>(null);

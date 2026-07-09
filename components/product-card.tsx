@@ -3,10 +3,10 @@
 import Image from "next/image";
 import Link from "next/link";
 import { ShoppingBag } from "lucide-react";
-import type { Product } from "@/data/products";
 import { useCart } from "@/components/cart-context";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { isProductSellable, type Product } from "@/src/domain/product";
 
 export function ProductCard({
   className,
@@ -18,7 +18,7 @@ export function ProductCard({
   product: Product;
 }) {
   const { addItem } = useCart();
-  const soldOut = product.status === "soldout";
+  const soldOut = !isProductSellable(product);
 
   return (
     <article className={cn("group overflow-hidden bg-transparent transition duration-500 hover:-translate-y-1", className)}>

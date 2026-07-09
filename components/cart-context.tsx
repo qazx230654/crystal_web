@@ -1,78 +1,166 @@
 "use client";
 
-import { createContext, useContext, useMemo, useState } from "react";
-import { useEffect } from "react";
-import type { Product } from "@/data/products";
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import type { ReactNode } from "react";
+import type { Product } from "@/src/domain/product";
 
-export type CartLine = {
-  product: Product;
+const cartStorageKey = "gooday-cart";
+
+export type CartItem = {
+  productId: string;
+  slug: string;
   quantity: number;
+  selectedVariant?: Record<string, string>;
+  customization?: Record<string, string>;
+};
+
+export type CartLine = CartItem & {
+  key: string;
   options?: Record<string, string>;
+  product: Product;
 };
 
 type CartContextValue = {
+  items: CartItem[];
   lines: CartLine[];
+  unavailableItems: CartItem[];
+  isHydrating: boolean;
   isOpen: boolean;
   openCart: () => void;
   closeCart: () => void;
-  addItem: (product: Product, options?: Record<string, string>) => void;
+  addItem: (
+    product: Product,
+    selectedVariant?: Record<string, string>,
+    customization?: Record<string, string>
+  ) => void;
   clearCart: () => void;
-  updateQuantity: (id: string, quantity: number) => void;
+  updateQuantity: (key: string, quantity: number) => void;
+  refreshCartProducts: () => Promise<CartLine[]>;
   total: number;
 };
 
 const CartContext = createContext<CartContextValue | null>(null);
 
-export function CartProvider({ children }: { children: React.ReactNode }) {
-  const [lines, setLines] = useState<CartLine[]>([]);
+export function CartProvider({ children }: { children: ReactNode }) {
+  const [items, setItems] = useState<CartItem[]>([]);
+  const [productsBySlug, setProductsBySlug] = useState<Record<string, Product>>({});
+  const [isHydrating, setIsHydrating] = useState(true);
+  const [isLoaded, setIsLoaded] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
 
-  useEffect(() => {
-    const saved = window.localStorage.getItem("gooday-cart");
-    if (!saved) return;
+  const hydrateProducts = useCallback(async (cartItems: CartItem[]) => {
+    if (!cartItems.length) {
+      setProductsBySlug({});
+      setIsHydrating(false);
+      return [];
+    }
 
+    setIsHydrating(true);
     try {
-      setLines(JSON.parse(saved) as CartLine[]);
+      const response = await fetch("/api/products", { cache: "no-store" });
+      const payload = await response.json();
+      const products = Array.isArray(payload.data) ? (payload.data as Product[]) : [];
+      const nextProductsBySlug = products.reduce<Record<string, Product>>((acc, product) => {
+        acc[product.slug] = product;
+        return acc;
+      }, {});
+
+      setProductsBySlug(nextProductsBySlug);
+      return cartItems
+        .map((item) => toCartLine(item, nextProductsBySlug[item.slug]))
+        .filter((line): line is CartLine => Boolean(line));
     } catch {
-      window.localStorage.removeItem("gooday-cart");
+      return [];
+    } finally {
+      setIsHydrating(false);
     }
   }, []);
 
   useEffect(() => {
-    window.localStorage.setItem("gooday-cart", JSON.stringify(lines));
-  }, [lines]);
+    const saved = window.localStorage.getItem(cartStorageKey);
+    if (!saved) {
+      setIsHydrating(false);
+      setIsLoaded(true);
+      return;
+    }
+
+    try {
+      const parsed = JSON.parse(saved) as Array<CartItem | LegacyCartLine>;
+      const nextItems = parsed.map(normalizeStoredCartItem).filter(Boolean) as CartItem[];
+      setItems(nextItems);
+      setIsLoaded(true);
+      void hydrateProducts(nextItems);
+    } catch {
+      window.localStorage.removeItem(cartStorageKey);
+      setIsHydrating(false);
+      setIsLoaded(true);
+    }
+  }, [hydrateProducts]);
+
+  useEffect(() => {
+    if (!isLoaded) return;
+    window.localStorage.setItem(cartStorageKey, JSON.stringify(items));
+    void hydrateProducts(items);
+  }, [hydrateProducts, isLoaded, items]);
+
+  const lines = useMemo(
+    () =>
+      items
+        .map((item) => toCartLine(item, productsBySlug[item.slug]))
+        .filter((line): line is CartLine => Boolean(line)),
+    [items, productsBySlug]
+  );
+  const unavailableItems = useMemo(
+    () => items.filter((item) => !productsBySlug[item.slug]),
+    [items, productsBySlug]
+  );
 
   const value = useMemo<CartContextValue>(() => {
     const total = lines.reduce((sum, line) => sum + line.product.price * line.quantity, 0);
 
     return {
+      items,
       lines,
+      unavailableItems,
+      isHydrating,
       isOpen,
       openCart: () => setIsOpen(true),
       closeCart: () => setIsOpen(false),
-      addItem: (product, options) => {
-        setLines((current) => {
-          const existing = current.find((line) => line.product.id === product.id);
+      addItem: (product, selectedVariant, customization) => {
+        setItems((current) => {
+          const nextItem: CartItem = {
+            productId: product.id,
+            slug: product.slug,
+            quantity: 1,
+            selectedVariant,
+            customization
+          };
+          const nextKey = getCartItemKey(nextItem);
+          const existing = current.find((item) => getCartItemKey(item) === nextKey);
+
           if (existing) {
-            return current.map((line) =>
-              line.product.id === product.id ? { ...line, quantity: line.quantity + 1, options } : line
+            return current.map((item) =>
+              getCartItemKey(item) === nextKey ? { ...item, quantity: item.quantity + 1 } : item
             );
           }
-          return [...current, { product, quantity: 1, options }];
+
+          return [...current, nextItem];
         });
+        setProductsBySlug((current) => ({ ...current, [product.slug]: product }));
         setIsOpen(true);
       },
-      clearCart: () => setLines([]),
-      updateQuantity: (id, quantity) => {
-        setLines((current) =>
+      clearCart: () => setItems([]),
+      updateQuantity: (key, quantity) => {
+        setItems((current) =>
           current
-            .map((line) => (line.product.id === id ? { ...line, quantity } : line))
-            .filter((line) => line.quantity > 0)
+            .map((item) => (getCartItemKey(item) === key ? { ...item, quantity } : item))
+            .filter((item) => item.quantity > 0)
         );
       },
+      refreshCartProducts: () => hydrateProducts(items),
       total
     };
-  }, [isOpen, lines]);
+  }, [hydrateProducts, isHydrating, isOpen, items, lines, unavailableItems]);
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
 }
@@ -83,4 +171,70 @@ export function useCart() {
     throw new Error("useCart must be used inside CartProvider");
   }
   return value;
+}
+
+function toCartLine(item: CartItem, product?: Product): CartLine | null {
+  if (!product) return null;
+
+  return {
+    ...item,
+    key: getCartItemKey(item),
+    options: {
+      ...(item.selectedVariant ?? {}),
+      ...(item.customization ?? {})
+    },
+    product
+  };
+}
+
+function getCartItemKey(item: CartItem) {
+  return [
+    item.productId,
+    item.slug,
+    stableStringify(item.selectedVariant),
+    stableStringify(item.customization)
+  ].join("|");
+}
+
+function stableStringify(value?: Record<string, string>) {
+  if (!value) return "";
+  return JSON.stringify(
+    Object.keys(value)
+      .sort()
+      .reduce<Record<string, string>>((acc, key) => {
+        acc[key] = value[key];
+        return acc;
+      }, {})
+  );
+}
+
+type LegacyCartLine = {
+  product?: Product;
+  quantity?: number;
+  options?: Record<string, string>;
+};
+
+function normalizeStoredCartItem(item: CartItem | LegacyCartLine): CartItem | null {
+  if ("product" in item && item.product) {
+    return {
+      productId: item.product.id,
+      slug: item.product.slug,
+      quantity: normalizeQuantity(item.quantity),
+      selectedVariant: item.options
+    };
+  }
+
+  if (!("productId" in item) || !("slug" in item)) return null;
+
+  return {
+    productId: item.productId,
+    slug: item.slug,
+    quantity: normalizeQuantity(item.quantity),
+    selectedVariant: item.selectedVariant,
+    customization: item.customization
+  };
+}
+
+function normalizeQuantity(quantity: unknown) {
+  return Math.max(1, Math.floor(Number(quantity) || 1));
 }

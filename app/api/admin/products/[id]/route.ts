@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { requireAdmin } from "@/services/admin-auth";
-import { type Category, type ProductStatus } from "@/data/product-types";
+import { type Category, type ProductStatus } from "@/src/domain/product";
 import { listProducts } from "@/services/product-service";
 import {
   archiveSupabaseProduct,

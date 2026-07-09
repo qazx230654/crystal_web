@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useAdminApi } from "@/hooks/useAdminApi";
 import {
   adminOrderFilterTabs,
   getAvailableAdminOrderActions,
@@ -28,9 +29,8 @@ function getEventMessage(event: any) {
 
 export default function AdminOrdersPage() {
   const router = useRouter();
+  const adminApi = useAdminApi({ initialLoading: true, nextPath: "/admin/orders" });
   const [orders, setOrders] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [details, setDetails] = useState<Record<string, any>>({});
   const [detailsLoading, setDetailsLoading] = useState<string | null>(null);
@@ -65,19 +65,11 @@ export default function AdminOrdersPage() {
   }, [orders]);
 
   async function loadOrders() {
-    setLoading(true);
-    setError(null);
-    const response = await fetch("/api/orders");
-    const payload = await response.json();
-    setLoading(false);
+    const payload = await adminApi.request<{ data: any[] }>("/api/orders", undefined, {
+      errorMessage: "無法讀取訂單"
+    });
 
-    if (response.status === 401) {
-      router.replace("/login?next=/admin/orders");
-      return;
-    }
-
-    if (!response.ok) {
-      setError(payload.error?.message ?? "無法讀取訂單");
+    if (!payload) {
       return;
     }
 
@@ -97,25 +89,18 @@ export default function AdminOrdersPage() {
       message = reason.trim();
     }
 
-    const response = await fetch(`/api/orders/${order.id}`, {
+    const payload = await adminApi.request<{ data: any }>(`/api/orders/${order.id}`, {
       body: JSON.stringify({ action, message }),
       headers: {
         "Content-Type": "application/json"
       },
       method: "PATCH"
+    }, {
+      errorMessage: "訂單操作失敗",
+      loading: false
     });
 
-    if (response.status === 401) {
-      router.replace("/login?next=/admin/orders");
-      return;
-    }
-
-    const payload = await response.json().catch(() => null);
-
-    if (!response.ok) {
-      setError(payload?.error?.message ?? "訂單操作失敗");
-      return;
-    }
+    if (!payload) return;
 
     setDetails((current) => {
       const next = { ...current };
@@ -142,12 +127,13 @@ export default function AdminOrdersPage() {
     if (details[id]) return;
 
     setDetailsLoading(id);
-    const response = await fetch(`/api/orders/${id}`);
-    const payload = await response.json();
+    const payload = await adminApi.request<{ data: any }>(`/api/orders/${id}`, undefined, {
+      errorMessage: "無法讀取訂單明細",
+      loading: false
+    });
     setDetailsLoading(null);
 
-    if (!response.ok) {
-      setError(payload.error?.message ?? "無法讀取訂單明細");
+    if (!payload) {
       return;
     }
 
@@ -182,7 +168,7 @@ export default function AdminOrdersPage() {
           </Button>
         </div>
       </div>
-      {error ? <p className="mt-6 rounded-md bg-red-50 p-4 text-red-700">{error}</p> : null}
+      {adminApi.error ? <p className="mt-6 rounded-md bg-red-50 p-4 text-red-700">{adminApi.error}</p> : null}
 
       <div className="mt-8 rounded-md border border-crystal-line bg-white/72 p-5 shadow-soft">
         <div className="grid gap-4 lg:grid-cols-[1fr_220px]">
@@ -229,8 +215,8 @@ export default function AdminOrdersPage() {
           <span>操作</span>
           <span aria-hidden="true" />
         </div>
-        {loading ? <p className="p-5 text-crystal-muted">讀取中...</p> : null}
-        {!loading && !visibleOrders.length ? <p className="p-5 text-crystal-muted">沒有符合條件的訂單。</p> : null}
+        {adminApi.loading ? <p className="p-5 text-crystal-muted">讀取中...</p> : null}
+        {!adminApi.loading && !visibleOrders.length ? <p className="p-5 text-crystal-muted">沒有符合條件的訂單。</p> : null}
         {visibleOrders.map((order) => {
           const detail = details[order.id];
           const orderStatus = getOrderStatus(order);

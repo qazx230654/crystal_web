@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import { Archive, ArchiveRestore, ImagePlus, RefreshCw, Save } from "lucide-react";
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { useAdminApi } from "@/hooks/useAdminApi";
+import { defaultStockLabelForStatus, productStatusLabels, type ProductStatus } from "@/src/domain/product";
 
 type AdminProduct = {
   id: string;
@@ -20,14 +22,14 @@ type AdminProduct = {
   description: string;
   stockLabel: string;
   deletedAt?: string | null;
-  status?: string;
+  status?: ProductStatus;
 };
 
 type ProductOptions = {
   benefits: string[];
   categories: Record<string, string>;
   minerals: string[];
-  statuses: Record<string, string>;
+  statuses: Record<ProductStatus, string>;
 };
 
 type ProductPayload = {
@@ -60,7 +62,7 @@ type ProductFormState = {
   originalPrice: string;
   price: string;
   slug: string;
-  status: string;
+  status: ProductStatus;
   stockLabel: string;
 };
 
@@ -78,7 +80,7 @@ const defaultFormState: ProductFormState = {
   price: "",
   slug: "",
   status: "active",
-  stockLabel: "現貨 2-5 個工作天寄出"
+  stockLabel: defaultStockLabelForStatus("active")
 };
 
 const fieldClass = "border border-crystal-line bg-white px-4 py-3 text-sm outline-crystal-rose";
@@ -104,14 +106,15 @@ function isSingleProductPayload(payload: SingleProductPayload | ErrorPayload | n
 
 export function ProductEditor({ productId }: { productId?: string }) {
   const router = useRouter();
+  const nextPath = productId ? `/admin/products/${productId}` : "/admin/products/new";
+  const adminApi = useAdminApi({ initialLoading: true, nextPath });
+  const { error, loading, request, setError, setLoading } = adminApi;
   const [formState, setFormState] = useState<ProductFormState>(defaultFormState);
   const [options, setOptions] = useState<ProductOptions | null>(null);
   const [mainImageFile, setMainImageFile] = useState<File | null>(null);
   const [extraImageFiles, setExtraImageFiles] = useState<File[]>([]);
-  const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [archiving, setArchiving] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [deletedAt, setDeletedAt] = useState<string | null>(null);
 
   const title = productId ? "編輯商品" : "新增商品";
@@ -126,17 +129,12 @@ export function ProductEditor({ productId }: { productId?: string }) {
       setLoading(true);
       setError(null);
 
-      const optionsResponse = await fetch("/api/admin/products");
-      const optionsPayload = (await optionsResponse.json().catch(() => null)) as ProductPayload | ErrorPayload | null;
+      const optionsPayload = await request<ProductPayload>("/api/admin/products", undefined, {
+        errorMessage: "無法讀取商品選項"
+      });
 
-      if (optionsResponse.status === 401) {
-        router.replace(`/login?next=${encodeURIComponent(productId ? `/admin/products/${productId}` : "/admin/products/new")}`);
-        return;
-      }
-
-      if (!optionsResponse.ok || !isOptionsPayload(optionsPayload)) {
-        const errorPayload = optionsPayload as ErrorPayload | null;
-        setError(errorPayload?.error?.message ?? "無法讀取商品選項");
+      if (!isOptionsPayload(optionsPayload)) {
+        if (optionsPayload) setError("無法讀取商品選項");
         setLoading(false);
         return;
       }
@@ -148,13 +146,13 @@ export function ProductEditor({ productId }: { productId?: string }) {
         return;
       }
 
-      const productResponse = await fetch(`/api/admin/products/${productId}`);
-      const productPayload = (await productResponse.json().catch(() => null)) as SingleProductPayload | ErrorPayload | null;
+      const productPayload = await request<SingleProductPayload>(`/api/admin/products/${productId}`, undefined, {
+        errorMessage: "無法讀取商品資料"
+      });
       setLoading(false);
 
-      if (!productResponse.ok || !isSingleProductPayload(productPayload)) {
-        const errorPayload = productPayload as ErrorPayload | null;
-        setError(errorPayload?.error?.message ?? "無法讀取商品資料");
+      if (!isSingleProductPayload(productPayload)) {
+        if (productPayload) setError("無法讀取商品資料");
         return;
       }
 
@@ -173,13 +171,13 @@ export function ProductEditor({ productId }: { productId?: string }) {
         originalPrice: product.originalPrice ? String(product.originalPrice) : "",
         price: String(product.price ?? ""),
         slug: product.slug ?? "",
-        status: product.status ?? "active",
-        stockLabel: product.stockLabel ?? "現貨 2-5 個工作天寄出"
+        status: (product.status as ProductStatus | undefined) ?? "active",
+        stockLabel: product.stockLabel ?? defaultStockLabelForStatus((product.status as ProductStatus | undefined) ?? "active")
       });
     }
 
-    load();
-  }, [productId, router]);
+    void load();
+  }, [productId, request, setError, setLoading]);
 
   useEffect(() => {
     return () => {
@@ -191,14 +189,16 @@ export function ProductEditor({ productId }: { productId?: string }) {
     const formData = new FormData();
     formData.append("file", file);
 
-    const response = await fetch("/api/admin/product-images", {
+    const payload = await request<{ data?: { url?: string } }>("/api/admin/product-images", {
       body: formData,
       method: "POST"
+    }, {
+      errorMessage: "圖片上傳失敗",
+      loading: false
     });
-    const payload = (await response.json().catch(() => null)) as { data?: { url?: string }; error?: { message?: string } } | null;
 
-    if (!response.ok || !payload?.data?.url) {
-      throw new Error(payload?.error?.message ?? "圖片上傳失敗");
+    if (!payload?.data?.url) {
+      throw new Error("圖片上傳失敗");
     }
 
     return payload.data.url;
@@ -233,7 +233,7 @@ export function ProductEditor({ productId }: { productId?: string }) {
       const images = Array.from(new Set([imageUrl, ...formState.images.filter(Boolean), ...uploadedExtraImages]));
       const minerals = Array.from(new Set([...formState.minerals, ...parseList(formState.customMinerals)]));
       const benefits = Array.from(new Set([...formState.benefits, ...parseList(formState.customBenefits)]));
-      const response = await fetch(productId ? `/api/admin/products/${productId}` : "/api/admin/products", {
+      const payload = await request<unknown>(productId ? `/api/admin/products/${productId}` : "/api/admin/products", {
         body: JSON.stringify({
           benefits,
           category: formState.category,
@@ -250,17 +250,12 @@ export function ProductEditor({ productId }: { productId?: string }) {
         }),
         headers: { "Content-Type": "application/json" },
         method: productId ? "PATCH" : "POST"
+      }, {
+        errorMessage: "商品儲存失敗",
+        loading: false
       });
-      const payload = (await response.json().catch(() => null)) as ErrorPayload | null;
 
-      if (response.status === 401) {
-        router.replace(`/login?next=${encodeURIComponent(productId ? `/admin/products/${productId}` : "/admin/products/new")}`);
-        return;
-      }
-
-      if (!response.ok) {
-        throw new Error(payload?.error?.message ?? "商品儲存失敗");
-      }
+      if (!payload) return;
 
       router.push("/admin/products");
       router.refresh();
@@ -282,21 +277,16 @@ export function ProductEditor({ productId }: { productId?: string }) {
     setError(null);
 
     try {
-      const response = await fetch(`/api/admin/products/${productId}`, {
+      const payload = await request<{ data?: { deleted_at?: string | null } }>(`/api/admin/products/${productId}`, {
         body: JSON.stringify({ action }),
         headers: { "Content-Type": "application/json" },
         method: "PATCH"
+      }, {
+        errorMessage: isArchive ? "商品封存失敗" : "解除封存失敗",
+        loading: false
       });
-      const payload = (await response.json().catch(() => null)) as { data?: { deleted_at?: string | null }; error?: { message?: string } } | null;
 
-      if (response.status === 401) {
-        router.replace(`/login?next=${encodeURIComponent(`/admin/products/${productId}`)}`);
-        return;
-      }
-
-      if (!response.ok) {
-        throw new Error(payload?.error?.message ?? (isArchive ? "商品封存失敗" : "解除封存失敗"));
-      }
+      if (!payload) return;
 
       setDeletedAt(payload?.data?.deleted_at ?? null);
       router.refresh();
@@ -357,8 +347,8 @@ export function ProductEditor({ productId }: { productId?: string }) {
               </label>
               <label className="grid gap-2">
                 <span className="text-xs font-bold tracking-[0.16em] text-crystal-muted">商品狀態 *</span>
-                <select className={fieldClass} onChange={(event) => setFormState((current) => ({ ...current, status: event.target.value }))} value={formState.status}>
-                  {Object.entries(options?.statuses ?? {}).map(([value, label]) => (
+                <select className={fieldClass} onChange={(event) => setFormState((current) => ({ ...current, status: event.target.value as ProductStatus }))} value={formState.status}>
+                  {Object.entries(options?.statuses ?? productStatusLabels).map(([value, label]) => (
                     <option key={value} value={value}>
                       {label}
                     </option>

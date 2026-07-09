@@ -2,7 +2,7 @@ import Link from "next/link";
 import { ProductCard } from "@/components/product-card";
 import { ProductSortSelect } from "@/components/product-sort-select";
 import { modules } from "@/config/modules";
-import { categoryLabels, type Category } from "@/data/products";
+import { productCategoryLabels, type Category } from "@/src/domain/product";
 import { listProducts, productSortOptions } from "@/services/product-service";
 
 export const dynamic = "force-dynamic";
@@ -26,7 +26,7 @@ export default async function ProductsPage({
         <div className="container-shell">
           {modules.product.categoryFilters ? (
             <div className="flex gap-6 overflow-x-auto py-5 text-xs text-crystal-muted">
-              {Object.entries(categoryLabels).map(([key, label]) => {
+              {Object.entries(productCategoryLabels).map(([key, label]) => {
                 const active = (!category && key === "all") || category === key;
 
                 return (

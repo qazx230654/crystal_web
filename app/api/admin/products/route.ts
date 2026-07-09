@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { type Category, type ProductStatus } from "@/data/product-types";
+import { defaultStockLabelForStatus, type Category, type ProductStatus } from "@/src/domain/product";
 import { getProductSource } from "@/data/product-source";
 import { requireAdmin } from "@/services/admin-auth";
 import { listProducts } from "@/services/product-service";
@@ -62,7 +62,7 @@ export async function POST(request: Request) {
       price: Number(payload.price),
       slug: payload.slug,
       status: payload.status ?? "active",
-      stockLabel: payload.stockLabel?.trim() || "現貨 2-5 個工作天寄出"
+      stockLabel: payload.stockLabel?.trim() || defaultStockLabelForStatus(payload.status ?? "active")
     });
 
     return NextResponse.json({ data: product }, { status: 201 });

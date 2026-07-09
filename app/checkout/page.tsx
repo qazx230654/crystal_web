@@ -7,10 +7,20 @@ import { CreditCard, Home, LockKeyhole, MapPin, Store, Upload } from "lucide-rea
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { useAuth } from "@/components/auth-context";
 import { useCart } from "@/components/cart-context";
+import type { CartLine } from "@/components/cart-context";
 import { bankTransferConfig, domesticShippingOptions, paymentOptions } from "@/config/checkout";
-
-type ShippingMethod = typeof domesticShippingOptions.blackCat.method | typeof domesticShippingOptions.sevenEleven.method;
-type PaymentMethod = typeof paymentOptions.bankTransfer.method | typeof paymentOptions.creditCard.method;
+import {
+  calculateCheckoutTotal,
+  calculateShippingFee,
+  checkoutPayloadBuilder,
+  checkoutValidator,
+  buildStoreLabel,
+  getCheckoutShippingFromSearchParams,
+  getStoreInfoFromSearchParams,
+  type DeliveryMethod,
+  type PaymentMethod
+} from "@/src/domain/checkout";
+import { getUnavailableProductMessage } from "@/src/domain/product";
 
 const checkoutFieldClass = "border border-crystal-line bg-white px-4 py-3 text-sm outline-crystal-rose";
 
@@ -18,26 +28,22 @@ function formatPrice(value: number) {
   return `NT$ ${value.toLocaleString()}`;
 }
 
-function resolveShippingFee(method: ShippingMethod, itemCount: number) {
-  if (itemCount >= 2) return 0;
-  return method === "black-cat" ? domesticShippingOptions.blackCat.fee : domesticShippingOptions.sevenEleven.fee;
-}
-
 export default function CheckoutPage() {
-  const { clearCart, lines, total } = useCart();
+  const { clearCart, isHydrating, items, lines, refreshCartProducts, total, unavailableItems } = useCart();
   const { loading: authLoading, member } = useAuth();
   const router = useRouter();
   const [checkoutMode, setCheckoutMode] = useState<"guest" | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [checkoutPriceSnapshot, setCheckoutPriceSnapshot] = useState<Record<string, number>>({});
   const [submitting, setSubmitting] = useState(false);
-  const [shippingMethod, setShippingMethod] = useState<ShippingMethod>("black-cat");
+  const [shippingMethod, setShippingMethod] = useState<DeliveryMethod>("black-cat");
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("credit-card");
   const [storeLabel, setStoreLabel] = useState("");
   const [transferFileName, setTransferFileName] = useState("");
 
   const itemCount = useMemo(() => lines.reduce((sum, line) => sum + line.quantity, 0), [lines]);
-  const shippingFee = resolveShippingFee(shippingMethod, itemCount);
-  const grandTotal = total + shippingFee;
+  const shippingFee = calculateShippingFee(shippingMethod, itemCount);
+  const grandTotal = calculateCheckoutTotal(total, shippingMethod, itemCount);
   const profile = member?.profile;
   const email = profile?.email ?? member?.user.email ?? "";
   const shouldShowCheckoutForm = Boolean(member || checkoutMode === "guest");
@@ -46,17 +52,27 @@ export default function CheckoutPage() {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const isGuest = params.get("guest") === "1";
-    const returnedShippingMethod = params.get("shipping");
-    const storeId = params.get("cvsStoreId");
-    const storeName = params.get("cvsStoreName");
-    const storeAddress = params.get("cvsAddress");
+    const returnedShippingMethod = getCheckoutShippingFromSearchParams(params);
+    const storeLabel = buildStoreLabel(getStoreInfoFromSearchParams(params));
 
     if (isGuest) setCheckoutMode("guest");
-    if (returnedShippingMethod === "711") setShippingMethod("711");
-    if (storeId || storeName || storeAddress) {
-      setStoreLabel([storeName, storeId ? `店號 ${storeId}` : "", storeAddress].filter(Boolean).join("｜"));
-    }
+    if (returnedShippingMethod) setShippingMethod(returnedShippingMethod);
+    if (storeLabel) setStoreLabel(storeLabel);
   }, []);
+
+  useEffect(() => {
+    if (isHydrating || !lines.length) return;
+
+    setCheckoutPriceSnapshot((current) => {
+      const next = { ...current };
+      lines.forEach((line) => {
+        if (next[line.key] === undefined) {
+          next[line.key] = line.product.price;
+        }
+      });
+      return next;
+    });
+  }, [isHydrating, lines]);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -64,44 +80,50 @@ export default function CheckoutPage() {
     setSubmitting(true);
 
     const formData = new FormData(event.currentTarget);
-    const address =
-      shippingMethod === "black-cat"
-        ? [
-            String(formData.get("postalCode") ?? "").trim(),
-            String(formData.get("city") ?? "").trim(),
-            String(formData.get("street") ?? "").trim(),
-            String(formData.get("detailAddress") ?? "").trim()
-          ]
-            .filter(Boolean)
-            .join(" ")
-        : storeLabel || "7-11 門市待選擇";
-    const transferNote =
-      paymentMethod === "bank-transfer"
-        ? `轉帳末五碼：${String(formData.get("bankLastFive") ?? "").trim() || "未填"}；轉帳截圖：${transferFileName || "未上傳"}`
-        : "";
-    const note = [String(formData.get("note") ?? "").trim(), transferNote].filter(Boolean).join("\n");
+    const latestLines = await refreshCartProducts();
+    const checkoutCartError = validateCheckoutCart({
+      expectedItemCount: items.length,
+      latestLines,
+      priceSnapshot: checkoutPriceSnapshot,
+      unavailableCount: unavailableItems.length
+    });
+
+    if (checkoutCartError) {
+      setCheckoutPriceSnapshot(
+        latestLines.reduce<Record<string, number>>((acc, line) => {
+          acc[line.key] = line.product.price;
+          return acc;
+        }, {})
+      );
+      setError(checkoutCartError);
+      setSubmitting(false);
+      return;
+    }
+
+    const latestItemCount = latestLines.reduce((sum, line) => sum + line.quantity, 0);
+    const orderPayload = checkoutPayloadBuilder.build({
+      formData,
+      lines: latestLines,
+      paymentMethod,
+      shippingMethod,
+      storeLabel,
+      transferFileName
+    });
+    const validationError = checkoutValidator.validate({
+      itemCount: latestItemCount,
+      paymentMethod,
+      payload: orderPayload,
+      shippingMethod
+    });
+
+    if (validationError) {
+      setError(validationError);
+      setSubmitting(false);
+      return;
+    }
 
     const response = await fetch("/api/orders", {
-      body: JSON.stringify({
-        customer: {
-          email: String(formData.get("email") ?? ""),
-          lineId: "",
-          name: String(formData.get("name") ?? ""),
-          phone: String(formData.get("phone") ?? "")
-        },
-        items: lines.map((line) => ({
-          options: line.options,
-          productId: line.product.id,
-          productSlug: line.product.slug,
-          quantity: line.quantity
-        })),
-        note,
-        paymentMethod,
-        shipping: {
-          address,
-          method: shippingMethod
-        }
-      }),
+      body: JSON.stringify(orderPayload),
       headers: { "Content-Type": "application/json" },
       method: "POST"
     });
@@ -117,7 +139,15 @@ export default function CheckoutPage() {
     router.push(`/orders/${payload.data.id}/success`);
   }
 
-  if (!lines.length) {
+  if (isHydrating) {
+    return (
+      <section className="container-shell grid min-h-[60vh] place-items-center py-16 text-center text-sm text-crystal-muted">
+        正在確認購物袋內容...
+      </section>
+    );
+  }
+
+  if (!items.length) {
     return (
       <section className="container-shell grid min-h-[60vh] place-items-center py-16 text-center">
         <div>
@@ -351,6 +381,33 @@ export default function CheckoutPage() {
       </form>
     </section>
   );
+}
+
+function validateCheckoutCart(input: {
+  expectedItemCount: number;
+  latestLines: CartLine[];
+  priceSnapshot: Record<string, number>;
+  unavailableCount: number;
+}) {
+  if (!input.expectedItemCount) return "購物袋是空的";
+  if (input.unavailableCount || input.latestLines.length !== input.expectedItemCount) {
+    return "購物袋中有商品已不存在或已下架，請回到購物袋確認後再結帳。";
+  }
+
+  const unavailableLine = input.latestLines.find((line) => Boolean(getUnavailableProductMessage(line.product)));
+  if (unavailableLine) {
+    return getUnavailableProductMessage(unavailableLine.product);
+  }
+
+  const changedPriceLine = input.latestLines.find((line) => {
+    const previousPrice = input.priceSnapshot[line.key];
+    return previousPrice !== undefined && previousPrice !== line.product.price;
+  });
+  if (changedPriceLine) {
+    return `商品「${changedPriceLine.product.name}」價格已更新，請確認訂單摘要後再送出。`;
+  }
+
+  return null;
 }
 
 function SectionTitle({ title }: { title: string }) {

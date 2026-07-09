@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { requireAdmin } from "@/services/admin-auth";
-import { uploadProductImage } from "@/services/supabase-storage";
+import { storageRepository } from "@/repositories/storage-repository";
 
 export const dynamic = "force-dynamic";
 
@@ -25,7 +25,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: { message: "圖片大小不可超過 6MB" } }, { status: 400 });
     }
 
-    const image = await uploadProductImage(file);
+    const image = await storageRepository.uploadProductImage(file);
     return NextResponse.json({ data: image }, { status: 201 });
   } catch (error) {
     const message = error instanceof Error ? error.message : "圖片上傳失敗";

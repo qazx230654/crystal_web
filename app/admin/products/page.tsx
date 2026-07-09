@@ -5,6 +5,15 @@ import { Edit3, Plus, RefreshCw, Search, ShoppingBag } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import { useAdminApi } from "@/hooks/useAdminApi";
+import {
+  getProductDisplayStatus,
+  getProductStatusCounts,
+  getProductStatusColor,
+  getProductStatusFilterOptions,
+  getProductStatusLabel,
+  type ProductStatus
+} from "@/src/domain/product";
 
 type AdminProduct = {
   id: string;
@@ -19,12 +28,12 @@ type AdminProduct = {
   description: string;
   stockLabel: string;
   deletedAt?: string | null;
-  status?: string;
+  status?: ProductStatus;
 };
 
 type ProductOptions = {
   categories: Record<string, string>;
-  statuses: Record<string, string>;
+  statuses: Record<ProductStatus, string>;
 };
 
 type ProductPayload = {
@@ -44,14 +53,6 @@ function formatPrice(value: number) {
   return `NT$ ${value.toLocaleString()}`;
 }
 
-function getStatusTone(status?: string) {
-  if (status === "archived") return "border border-amber-200 bg-amber-50 text-amber-800";
-  if (status === "draft") return "bg-slate-100 text-slate-700";
-  if (status === "hidden") return "bg-zinc-100 text-zinc-700";
-  if (status === "soldout") return "bg-red-50 text-red-700";
-  return "bg-emerald-50 text-emerald-700";
-}
-
 function formatDateTime(value: string) {
   return new Intl.DateTimeFormat("zh-TW", {
     day: "2-digit",
@@ -68,30 +69,20 @@ function isProductPayload(payload: ProductPayload | ErrorPayload | null): payloa
 
 export default function AdminProductsPage() {
   const router = useRouter();
+  const adminApi = useAdminApi({ initialLoading: true, nextPath: "/admin/products" });
   const [products, setProducts] = useState<AdminProduct[]>([]);
   const [options, setOptions] = useState<ProductOptions | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
 
   async function loadProducts() {
-    setLoading(true);
-    setError(null);
+    const payload = await adminApi.request<ProductPayload>("/api/admin/products", undefined, {
+      errorMessage: "無法讀取商品資料"
+    });
 
-    const response = await fetch("/api/admin/products");
-    const payload = (await response.json().catch(() => null)) as ProductPayload | ErrorPayload | null;
-    setLoading(false);
-
-    if (response.status === 401) {
-      router.replace("/login?next=/admin/products");
-      return;
-    }
-
-    if (!response.ok || !isProductPayload(payload)) {
-      const errorPayload = payload as ErrorPayload | null;
-      setError(errorPayload?.error?.message ?? "無法讀取商品資料");
+    if (!isProductPayload(payload)) {
+      if (payload) adminApi.setError("無法讀取商品資料");
       return;
     }
 
@@ -99,24 +90,17 @@ export default function AdminProductsPage() {
     setOptions(payload.meta.options);
   }
 
-  async function updateStatus(productId: string, status: string) {
-    const response = await fetch(`/api/admin/products/${productId}`, {
+  async function updateStatus(productId: string, status: ProductStatus) {
+    const payload = await adminApi.request<unknown>(`/api/admin/products/${productId}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ status })
+    }, {
+      errorMessage: "更新商品狀態失敗",
+      loading: false
     });
 
-    const payload = (await response.json().catch(() => null)) as ErrorPayload | null;
-
-    if (response.status === 401) {
-      router.replace("/login?next=/admin/products");
-      return;
-    }
-
-    if (!response.ok) {
-      setError(payload?.error?.message ?? "更新商品狀態失敗");
-      return;
-    }
+    if (!payload) return;
 
     setProducts((current) => current.map((item) => (item.id === productId ? { ...item, status } : item)));
   }
@@ -133,7 +117,7 @@ export default function AdminProductsPage() {
 
   const filteredProducts = products.filter((product) => {
     const keyword = searchTerm.trim().toLowerCase();
-    const status = product.deletedAt ? "archived" : product.status ?? "active";
+    const status = getProductDisplayStatus(product);
     const matchesCategory = categoryFilter === "all" || product.category.includes(categoryFilter);
     const matchesStatus = statusFilter === "all" || statusFilter === status;
     const matchesKeyword =
@@ -155,29 +139,8 @@ export default function AdminProductsPage() {
     },
     { all: 0 }
   );
-  const statusCounts = products.reduce(
-    (counts, product) => {
-      const status = product.status ?? "active";
-      counts.total += 1;
-      if (product.deletedAt) {
-        counts.archived += 1;
-        return counts;
-      }
-      if (status === "active") counts.active += 1;
-      if (status === "hidden") counts.hidden += 1;
-      if (status === "soldout") counts.soldout += 1;
-      return counts;
-    },
-    { active: 0, archived: 0, hidden: 0, soldout: 0, total: 0 }
-  );
-  const statusOptions = [
-    ["all", `全部狀態（${statusCounts.total}）`],
-    ["active", `上架中（${statusCounts.active}）`],
-    ["hidden", `隱藏（${statusCounts.hidden}）`],
-    ["soldout", `售完展示（${statusCounts.soldout}）`],
-    ["draft", `草稿（${products.filter((product) => !product.deletedAt && product.status === "draft").length}）`],
-    ["archived", `已封存（${statusCounts.archived}）`]
-  ];
+  const statusCounts = getProductStatusCounts(products);
+  const statusOptions = getProductStatusFilterOptions(statusCounts);
 
   return (
     <section className="container-shell py-10">
@@ -206,7 +169,7 @@ export default function AdminProductsPage() {
         </div>
       </div>
 
-      {error ? <p className="mt-6 border border-red-100 bg-red-50 p-4 text-sm text-red-700">{error}</p> : null}
+      {adminApi.error ? <p className="mt-6 border border-red-100 bg-red-50 p-4 text-sm text-red-700">{adminApi.error}</p> : null}
 
       <div className="mt-8 grid gap-4 lg:grid-cols-4">
         <StatCard label="商品總數" title="Products" value={statusCounts.total} />
@@ -244,8 +207,8 @@ export default function AdminProductsPage() {
               ))}
             </select>
           </label>
-          <button className="inline-flex items-center justify-center gap-2 border border-crystal-gold/45 bg-white px-5 py-3 text-xs font-semibold tracking-[0.08em] text-crystal-ink transition hover:bg-crystal-champagne/30 disabled:opacity-60" disabled={loading} onClick={loadProducts} type="button">
-            <RefreshCw className={loading ? "animate-spin" : ""} size={16} />
+          <button className="inline-flex items-center justify-center gap-2 border border-crystal-gold/45 bg-white px-5 py-3 text-xs font-semibold tracking-[0.08em] text-crystal-ink transition hover:bg-crystal-champagne/30 disabled:opacity-60" disabled={adminApi.loading} onClick={loadProducts} type="button">
+            <RefreshCw className={adminApi.loading ? "animate-spin" : ""} size={16} />
             重新讀取
           </button>
         </div>
@@ -261,8 +224,8 @@ export default function AdminProductsPage() {
           <span>操作</span>
         </div>
 
-        {loading ? <p className="p-5 text-crystal-muted">讀取商品中...</p> : null}
-        {!loading && !filteredProducts.length ? <p className="p-5 text-crystal-muted">沒有符合條件的商品。</p> : null}
+        {adminApi.loading ? <p className="p-5 text-crystal-muted">讀取商品中...</p> : null}
+        {!adminApi.loading && !filteredProducts.length ? <p className="p-5 text-crystal-muted">沒有符合條件的商品。</p> : null}
 
         {filteredProducts.map((product) => (
           <div className="grid gap-4 border-b border-crystal-line p-5 text-sm lg:grid-cols-[96px_1.2fr_0.8fr_0.7fr_0.8fr_0.9fr] lg:items-center" key={product.id}>
@@ -293,14 +256,14 @@ export default function AdminProductsPage() {
               {product.originalPrice ? <p className="text-xs text-crystal-muted line-through">{formatPrice(product.originalPrice)}</p> : null}
             </div>
             <div className="grid gap-2">
-              <span className={`inline-flex w-fit px-3 py-1 text-xs font-semibold ${getStatusTone(product.deletedAt ? "archived" : product.status)}`}>
-                {product.deletedAt ? "已封存" : options?.statuses[product.status ?? "active"] ?? product.status ?? "上架中"}
+              <span className={`inline-flex w-fit px-3 py-1 text-xs font-semibold ${getProductStatusColor(getProductDisplayStatus(product))}`}>
+                {product.deletedAt ? getProductStatusLabel("archived") : options?.statuses[product.status ?? "active"] ?? getProductStatusLabel(product.status)}
               </span>
               {product.deletedAt ? <span className="text-xs text-amber-700">封存於 {formatDateTime(product.deletedAt)}</span> : null}
               <span className="text-xs text-crystal-muted">{product.stockLabel}</span>
             </div>
             <div className="grid gap-2">
-              <select className="border border-crystal-line bg-white px-3 py-2 text-xs outline-crystal-rose" onChange={(event) => updateStatus(product.id, event.target.value)} value={product.status ?? "active"}>
+              <select className="border border-crystal-line bg-white px-3 py-2 text-xs outline-crystal-rose" onChange={(event) => updateStatus(product.id, event.target.value as ProductStatus)} value={product.status ?? "active"}>
                 {Object.entries(options?.statuses ?? {}).map(([value, label]) => (
                   <option key={value} value={value}>
                     {label}

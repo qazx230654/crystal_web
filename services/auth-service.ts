@@ -1,4 +1,4 @@
-import { supabaseRest, SupabaseConfigError } from "@/services/supabase-rest";
+import { memberRepository } from "@/repositories/member-repository";
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseAuthKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -167,11 +167,7 @@ export async function getAuthUser(accessToken: string) {
 }
 
 export async function getMemberProfile(id: string) {
-  const rows = await supabaseRest<MemberProfile[]>("profiles", {
-    query: `?id=eq.${encodeURIComponent(id)}&select=*`
-  });
-
-  return rows[0] ?? null;
+  return memberRepository.getProfile(id);
 }
 
 export async function saveMemberProfile(profile: MemberProfile) {
@@ -185,27 +181,16 @@ export async function saveMemberProfile(profile: MemberProfile) {
   };
 
   if (existing) {
-    const [updated] = await supabaseRest<MemberProfile[]>("profiles", {
-      body,
-      method: "PATCH",
-      query: `?id=eq.${encodeURIComponent(profile.id)}`
-    });
-
-    return updated;
+    return memberRepository.updateProfile(profile.id, body);
   }
 
-  const [created] = await supabaseRest<MemberProfile[]>("profiles", {
-    body: {
+  return memberRepository.createProfile({
       ...body,
       id: profile.id,
       role: profile.role || "member",
       status: profile.status || "active",
       vip_tier: profile.vip_tier || null
-    },
-    method: "POST"
   });
-
-  return created;
 }
 
 async function ensureMemberProfile(user: SupabaseAuthUser) {

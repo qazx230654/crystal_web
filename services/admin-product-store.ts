@@ -1,6 +1,15 @@
 import { promises as fs } from "node:fs";
 import path from "node:path";
-import { categoryLabels, productStatusLabels, type Category, type Product, type ProductStatus } from "@/data/product-types";
+import {
+  defaultBenefitOptions,
+  defaultMineralOptions,
+  productCategoryLabels,
+  productStatusLabels,
+  sortProductTags,
+  type Category,
+  type Product,
+  type ProductStatus
+} from "@/src/domain/product";
 
 const adminProductsFile = path.join(process.cwd(), "data", "admin-products.json");
 
@@ -102,9 +111,9 @@ export function getProductFormOptions(products: Product[]) {
   });
 
   return {
-    benefits: Array.from(benefitSet).sort((a, b) => a.localeCompare(b, "zh-Hant")),
-    categories: categoryLabels,
-    minerals: Array.from(mineralSet).sort((a, b) => a.localeCompare(b, "zh-Hant")),
+    benefits: sortProductTags([...defaultBenefitOptions, ...Array.from(benefitSet)]),
+    categories: productCategoryLabels,
+    minerals: sortProductTags([...defaultMineralOptions, ...Array.from(mineralSet)]),
     statuses: productStatusLabels
   };
 }

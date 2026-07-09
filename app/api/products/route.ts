@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { listProducts } from "@/services/product-service";
-import type { Category } from "@/data/product-types";
+import type { Category } from "@/src/domain/product";
 import { getProductSource } from "@/data/product-source";
 
 export const dynamic = "force-dynamic";

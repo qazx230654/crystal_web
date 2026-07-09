@@ -26,7 +26,7 @@ export function CartDrawer() {
           <>
             <div className="flex-1 space-y-4 overflow-auto p-6">
               {lines.map((line) => (
-                <div className="flex gap-4 rounded-md border border-crystal-line bg-white/72 p-3" key={line.product.id}>
+                <div className="flex gap-4 rounded-md border border-crystal-line bg-white/72 p-3" key={line.key}>
                   <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-md bg-crystal-pearl">
                     <Image alt={line.product.name} fill className="object-cover" src={line.product.image} sizes="80px" />
                   </div>
@@ -34,11 +34,11 @@ export function CartDrawer() {
                     <p className="font-medium">{line.product.name}</p>
                     <p className="mt-1 text-sm text-crystal-muted">NT$ {line.product.price.toLocaleString()}</p>
                     <div className="mt-3 inline-flex items-center rounded-full border border-crystal-line bg-crystal-cream">
-                      <button className="grid h-8 w-8 place-items-center" onClick={() => updateQuantity(line.product.id, line.quantity - 1)} type="button">
+                      <button className="grid h-8 w-8 place-items-center" onClick={() => updateQuantity(line.key, line.quantity - 1)} type="button">
                         <Minus size={14} />
                       </button>
                       <span className="w-8 text-center text-sm">{line.quantity}</span>
-                      <button className="grid h-8 w-8 place-items-center" onClick={() => updateQuantity(line.product.id, line.quantity + 1)} type="button">
+                      <button className="grid h-8 w-8 place-items-center" onClick={() => updateQuantity(line.key, line.quantity + 1)} type="button">
                         <Plus size={14} />
                       </button>
                     </div>

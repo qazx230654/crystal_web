@@ -1,25 +1,13 @@
 import { mockProducts } from "@/data/mock-products";
-import { categoryLabels, type Category, type Product } from "@/data/product-types";
-import { decodeStoredStockLabel } from "@/services/product-status";
-import { SupabaseConfigError, supabaseRest } from "@/services/supabase-rest";
-
-type SupabaseProductRow = {
-  id: string;
-  slug: string;
-  name: string;
-  price: number;
-  original_price: number | null;
-  category: string[] | null;
-  minerals: string[] | null;
-  benefits: string[] | null;
-  image: string | null;
-  images: string[] | null;
-  description: string | null;
-  stock_label: string | null;
-  sales: number | null;
-  created_at: string | null;
-  deleted_at: string | null;
-};
+import {
+  decodeStoredStockLabel,
+  isProductCategory,
+  isProductVisible,
+  type Category,
+  type Product
+} from "@/src/domain/product";
+import { productRepository, type SupabaseProductRow } from "@/repositories/product-repository";
+import { SupabaseConfigError } from "@/services/supabase-rest";
 
 export const products = mockProducts;
 
@@ -31,9 +19,7 @@ export async function getProducts(options?: { includeInactive?: boolean }): Prom
   }
 
   try {
-    const rows = await supabaseRest<SupabaseProductRow[]>("products", {
-      query: "?select=*&order=created_at.desc.nullslast"
-    });
+    const rows = await productRepository.listProducts();
     const normalized = rows.map(normalizeSupabaseProduct).filter(Boolean) as Product[];
     return filterVisible(normalized, options?.includeInactive);
   } catch (error) {
@@ -49,6 +35,11 @@ export async function getProducts(options?: { includeInactive?: boolean }): Prom
 export async function getProduct(slug: string, options?: { includeInactive?: boolean }): Promise<Product> {
   const productList = await getProducts(options);
   return productList.find((product) => product.slug === slug) ?? productList[0] ?? mockProducts[0];
+}
+
+export async function findProductBySlug(slug: string, options?: { includeInactive?: boolean }): Promise<Product | null> {
+  const productList = await getProducts(options);
+  return productList.find((product) => product.slug === slug) ?? null;
 }
 
 export function getProductSource() {
@@ -96,15 +87,11 @@ function normalizeList(value: string[] | null) {
 }
 
 function normalizeCategoryList(value: string[] | null): Category[] {
-  return normalizeList(value).filter((item): item is Category => item in categoryLabels && item !== "all");
+  return normalizeList(value).filter(isProductCategory);
 }
 
 function filterVisible(productsToFilter: Product[], includeInactive?: boolean) {
   if (includeInactive) return productsToFilter;
 
-  return productsToFilter.filter((product) => {
-    if (product.deletedAt) return false;
-    const status = product.status ?? "active";
-    return status === "active" || status === "soldout";
-  });
+  return productsToFilter.filter(isProductVisible);
 }

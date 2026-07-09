@@ -1,24 +1,6 @@
-import type { Category, ProductStatus } from "@/data/product-types";
+import type { Category, ProductStatus } from "@/src/domain/product";
+import { productRepository, type ProductInsertRecord, type ProductUpdateRecord } from "@/repositories/product-repository";
 import { decodeStoredStockLabel, encodeStoredStockLabel } from "@/services/product-status";
-import { supabaseRest } from "@/services/supabase-rest";
-
-type SupabaseProductInsert = {
-  slug: string;
-  name: string;
-  price: number;
-  original_price?: number | null;
-  category: Category[];
-  minerals: string[];
-  benefits: string[];
-  image: string;
-  images: string[];
-  description?: string;
-  stock_label: string;
-  sales?: number;
-  created_at?: string;
-};
-
-type SupabaseProductUpdate = Omit<SupabaseProductInsert, "created_at" | "sales">;
 
 export type SupabaseProductInput = {
   benefits: string[];
@@ -37,7 +19,7 @@ export type SupabaseProductInput = {
 
 export async function createSupabaseProduct(input: SupabaseProductInput) {
   const slug = normalizeSlug(input.slug || input.name);
-  const payload: SupabaseProductInsert = {
+  const payload: ProductInsertRecord = {
     slug,
     name: input.name.trim(),
     price: Number(input.price),
@@ -53,17 +35,12 @@ export async function createSupabaseProduct(input: SupabaseProductInput) {
     created_at: new Date().toISOString().slice(0, 10)
   };
 
-  const [product] = await supabaseRest<Array<{ id: string } & SupabaseProductInsert>>("products", {
-    body: payload,
-    method: "POST"
-  });
-
-  return product;
+  return productRepository.createProduct(payload);
 }
 
 export async function updateSupabaseProduct(id: string, input: SupabaseProductInput) {
   const slug = normalizeSlug(input.slug || input.name);
-  const payload: SupabaseProductUpdate = {
+  const payload: ProductUpdateRecord = {
     slug,
     name: input.name.trim(),
     price: Number(input.price),
@@ -77,11 +54,7 @@ export async function updateSupabaseProduct(id: string, input: SupabaseProductIn
     stock_label: encodeStoredStockLabel(input.stockLabel, input.status)
   };
 
-  const [product] = await supabaseRest<Array<{ id: string } & SupabaseProductUpdate>>("products", {
-    body: payload,
-    method: "PATCH",
-    query: `?id=eq.${encodeURIComponent(id)}`
-  });
+  const product = await productRepository.updateProduct(id, payload);
 
   if (!product) {
     throw new Error("找不到要更新的商品。");
@@ -91,30 +64,20 @@ export async function updateSupabaseProduct(id: string, input: SupabaseProductIn
 }
 
 export async function updateSupabaseProductStatus(id: string, status: ProductStatus) {
-  const [current] = await supabaseRest<Array<{ id: string; stock_label: string | null }>>("products", {
-    query: `?id=eq.${encodeURIComponent(id)}&select=id,stock_label`
-  });
+  const current = await productRepository.getProductStockLabel(id);
 
   if (!current) {
     throw new Error("找不到要更新的商品。");
   }
 
   const parsed = decodeStoredStockLabel(current.stock_label);
-  const [updated] = await supabaseRest<Array<{ id: string; stock_label: string | null }>>("products", {
-    body: { stock_label: encodeStoredStockLabel(parsed.stockLabel, status) },
-    method: "PATCH",
-    query: `?id=eq.${encodeURIComponent(id)}`
-  });
+  const updated = await productRepository.updateProductStockLabel(id, encodeStoredStockLabel(parsed.stockLabel, status));
 
   return updated;
 }
 
 export async function archiveSupabaseProduct(id: string) {
-  const [product] = await supabaseRest<Array<{ id: string; deleted_at: string | null }>>("products", {
-    body: { deleted_at: new Date().toISOString() },
-    method: "PATCH",
-    query: `?id=eq.${encodeURIComponent(id)}`
-  });
+  const product = await productRepository.archiveProduct(id);
 
   if (!product) {
     throw new Error("找不到要封存的商品。");
@@ -124,11 +87,7 @@ export async function archiveSupabaseProduct(id: string) {
 }
 
 export async function restoreSupabaseProduct(id: string) {
-  const [product] = await supabaseRest<Array<{ id: string; deleted_at: string | null }>>("products", {
-    body: { deleted_at: null },
-    method: "PATCH",
-    query: `?id=eq.${encodeURIComponent(id)}`
-  });
+  const product = await productRepository.restoreProduct(id);
 
   if (!product) {
     throw new Error("找不到要解除封存的商品。");
