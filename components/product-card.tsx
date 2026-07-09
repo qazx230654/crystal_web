@@ -21,12 +21,12 @@ export function ProductCard({
   const soldOut = !isProductSellable(product);
 
   return (
-    <article className={cn("group overflow-hidden bg-transparent transition duration-500 hover:-translate-y-1", className)}>
+    <article className={cn("group overflow-hidden bg-transparent", className)}>
       <Link href={`/products/${product.slug}`} className="block">
-        <div className={cn("relative aspect-[4/5] overflow-hidden bg-crystal-pearl", mediaClassName)}>
+        <div className={cn("relative aspect-4/5 overflow-hidden bg-crystal-pearl", mediaClassName)}>
           <Image
             alt={product.name}
-            className="object-cover transition duration-500 group-hover:scale-105"
+            className="object-cover transition-transform duration-500 ease-out group-hover:scale-[1.04]"
             fill
             sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw"
             src={product.image}

@@ -1,27 +1,37 @@
-import Image from "next/image";
 import Link from "next/link";
+import { BrandStorySections } from "@/app/about/brand-story-sections";
+import { brandStorySections } from "@/app/about/brand-story-model";
+import { Reveal } from "@/components/reveal";
 
 export default function AboutPage() {
   return (
-    <section className="container-shell py-14">
-      <div className="grid gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
-        <div>
-          <p className="text-xs font-bold uppercase tracking-[0.32em] text-crystal-rose">Crystal</p>
-          <h1 className="mt-4 font-serif text-5xl font-semibold leading-tight md:text-7xl">每一顆水晶，都在等一個對的人</h1>
-          <p className="mt-6 leading-8 text-crystal-muted">Crystal 相信，每一顆水晶都帶著自己的頻率。它不修復你，它提醒你，你本來就是完整的。</p>
-          <Link className="mt-8 inline-flex border border-crystal-gold/45 bg-white/80 px-5 py-2.5 text-xs font-semibold tracking-[0.08em] text-crystal-ink shadow-[0_12px_28px_rgba(185,151,91,0.12)] transition hover:bg-crystal-champagne/30" href="/products">
-            探索與你有緣的頻率
-          </Link>
-        </div>
-        <div className="relative aspect-[1.1/1] overflow-hidden rounded-md border border-crystal-line shadow-soft">
-          <Image alt="水晶手鍊細節" fill className="object-cover" src="https://goodaytarot.com/images/about-crystal.jpg" sizes="(min-width:1024px) 55vw, 100vw" />
-        </div>
+    <section className="container-shell py-20 md:py-28">
+      <Reveal as="div" className="mx-auto max-w-2xl text-center">
+        <p className="luxury-eyebrow">Our Story</p>
+        <h1 className="mt-5 font-serif text-4xl font-semibold leading-tight text-crystal-ink md:text-6xl">與你的頻率相遇的故事</h1>
+        <p className="mt-6 leading-8 text-crystal-muted">
+          從一段自我安頓的日子開始，到今天陪伴超過萬名顧客——這是 Crystal 一直沒有變過的初衷。
+        </p>
+      </Reveal>
+
+      <div className="mt-20 md:mt-28">
+        <BrandStorySections sections={brandStorySections} />
       </div>
-      <article className="mx-auto mt-16 max-w-3xl border border-crystal-gold/24 bg-white/84 p-8 text-center leading-9 shadow-[0_20px_56px_rgba(185,151,91,0.1)]">
-        <h2 className="font-serif text-4xl font-semibold">Crystal，收藏每一段剛剛好的頻率。</h2>
-        <p className="mt-6 text-crystal-muted">它在最美的時刻落下，卻從不覺得自己在消逝。療癒不是一個目的地，而是你每天與自己相處的方式。</p>
-        <p className="mt-6 text-crystal-muted">水晶不是魔法，但它是一個錨點，讓你在忙碌、混亂、或疲憊的日子裡，想起自己值得被好好對待。</p>
-      </article>
+
+      <Reveal
+        as="div"
+        className="mx-auto mt-24 max-w-3xl border-t border-crystal-line pt-16 text-center md:mt-32"
+        delay={80}
+      >
+        <h2 className="font-serif text-3xl font-semibold text-crystal-ink md:text-4xl">收藏每一段剛剛好的頻率</h2>
+        <p className="mt-6 leading-8 text-crystal-muted">它在最美的時刻落下，卻從不覺得自己在消逝。療癒不是一個目的地，而是你每天與自己相處的方式。</p>
+        <Link
+          className="mt-8 inline-flex border border-crystal-gold/45 bg-white/80 px-6 py-3 text-xs font-semibold tracking-[0.08em] text-crystal-ink shadow-[0_12px_28px_rgba(185,151,91,0.12)] transition hover:bg-crystal-champagne/30"
+          href="/products"
+        >
+          探索與你有緣的頻率
+        </Link>
+      </Reveal>
     </section>
   );
 }

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ChevronDown, Menu, Search, ShoppingBag, User, X } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { navLinks } from "@/data/site";
 import { Brand } from "@/components/brand";
 import { useCart } from "@/components/cart-context";
@@ -31,6 +31,7 @@ export function Header() {
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
   const [categoryOpen, setCategoryOpen] = useState(false);
+  const categoryCloseTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const { lines, openCart } = useCart();
   const { member } = useAuth();
   const count = lines.reduce((sum, line) => sum + line.quantity, 0);
@@ -43,10 +44,28 @@ export function Header() {
   ];
   const visibleNavLinks = navLinks.filter((link) => !["訂單查詢"].includes(link.label));
 
+  function openCategoryMenu() {
+    if (categoryCloseTimer.current) {
+      clearTimeout(categoryCloseTimer.current);
+      categoryCloseTimer.current = null;
+    }
+    setCategoryOpen(true);
+  }
+
+  function scheduleCategoryMenuClose() {
+    categoryCloseTimer.current = setTimeout(() => setCategoryOpen(false), 150);
+  }
+
   useEffect(() => {
     setCategoryOpen(false);
     setMenuOpen(false);
   }, [pathname]);
+
+  useEffect(() => {
+    return () => {
+      if (categoryCloseTimer.current) clearTimeout(categoryCloseTimer.current);
+    };
+  }, []);
 
   return (
     <>
@@ -57,7 +76,7 @@ export function Header() {
             <Link className="transition hover:text-crystal-gold" href="/products?category=monthly" onClick={() => setCategoryOpen(false)}>
               每月限量
             </Link>
-            <div className="relative">
+            <div className="relative" onMouseEnter={openCategoryMenu} onMouseLeave={scheduleCategoryMenuClose}>
               <button
                 className="inline-flex items-center gap-1.5 transition hover:text-crystal-gold"
                 onClick={() => setCategoryOpen((value) => !value)}

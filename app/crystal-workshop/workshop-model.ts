@@ -96,7 +96,7 @@ export const workshopExperiences: WorkshopExperience[] = [
       caption: "生命靈數 · 水晶手鍊體驗"
     },
     tags: [
-      { icon: "location", label: "桃園火車站開車 7 分鐘" },
+      { icon: "location", label: "火車站開車 7 分鐘" },
       { icon: "people", label: "1-4 人團班制" },
       { icon: "duration", label: "1.5 - 2 小時" }
     ],
@@ -120,26 +120,26 @@ export const workshopExperiences: WorkshopExperience[] = [
     }
   },
   {
-    id: "crystal-business-class",
-    title: "水晶創業全能班",
-    description: "不只是手作，更是一套完整的創業思維。從水晶理論、基礎美學，到少見技術細節與小資創業 SOP 都完整分享。",
+    id: "tarot-reading",
+    title: "塔羅占卜體驗",
+    description: "透過牌卡照見此刻最真實的狀態，無論是愛情、財富、職涯還是人生方向，都能在一對一的對話中找到清晰而具體的指引。",
     image: {
       src: "https://goodaytarot.com/images/workshop-small-class.jpg",
-      alt: "水晶創業全能班上課實況",
-      caption: "水晶創業 · 全能養成班"
+      alt: "塔羅占卜體驗",
+      caption: "一對一 · 塔羅占卜"
     },
-    tags: [{ icon: "duration", label: "全程 5.5 小時（含休息）" }],
-    highlightsTitle: "這堂課會讓你學到：",
+    tags: [{ icon: "duration", label: "全程 0.5 小時" }],
+    highlightsTitle: "這場占卜可以幫你：",
     highlights: [
-      "基礎美學、金屬材質與常用配件",
-      "小資創業完整 SOP",
-      "手鍊／項鍊／吊飾實作（共 3 件作品）",
-      "配色秘訣＋專業打結手法",
-      "淨化保養與手鍊喚醒方式",
-      "建立日常能量維護習慣"
+      "愛情、財富、職涯等主題皆可深入諮詢",
+      "一對一牌卡解讀，聚焦當下最在意的問題",
+      "流年運勢與能量走向完整分析",
+      "梳理心結，找回內在安定的力量",
+      "占卜後提供具體可行的行動建議",
+      "適合初次接觸塔羅或定期諮詢的你"
     ],
     cta: {
-      label: "聯繫 LINE 諮詢課程",
+      label: "聯繫 LINE 預約占卜",
       href: contactLinks.line.href
     }
   }

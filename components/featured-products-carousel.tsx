@@ -3,6 +3,7 @@
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useEffect, useRef } from "react";
 import { ProductCard } from "@/components/product-card";
+import { Reveal } from "@/components/reveal";
 import type { Product } from "@/src/domain/product";
 
 export function FeaturedProductsCarousel({ products }: { products: Product[] }) {
@@ -63,17 +64,19 @@ export function FeaturedProductsCarousel({ products }: { products: Product[] }) 
         className="no-scrollbar flex snap-x snap-mandatory gap-5 overflow-x-auto scroll-smooth pb-2"
         ref={trackRef}
       >
-        {products.map((product) => (
+        {products.map((product, index) => (
           <div
             className="featured-carousel-card h-[420px] snap-start"
             data-carousel-card
             key={product.id}
           >
-            <ProductCard
-              className="h-full"
-              mediaClassName="aspect-auto h-[300px] lg:h-[320px]"
-              product={product}
-            />
+            <Reveal className="h-full" delay={Math.min(index, 5) * 80}>
+              <ProductCard
+                className="h-full"
+                mediaClassName="aspect-auto h-[300px] lg:h-[320px]"
+                product={product}
+              />
+            </Reveal>
           </div>
         ))}
       </div>

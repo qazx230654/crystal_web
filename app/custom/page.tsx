@@ -39,7 +39,7 @@ export default function CustomPage() {
   return (
     <section className="bg-[#fbf8f5] text-crystal-ink">
       <section className="relative grid min-h-[calc(100vh-112px)] place-items-center overflow-hidden px-6 py-24 text-center">
-        <div className="absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-white to-transparent" />
+        <div className="absolute inset-x-0 top-0 h-40 bg-linear-to-b from-white to-transparent" />
         <div className="absolute bottom-0 left-1/2 h-64 w-[min(78vw,760px)] -translate-x-1/2 rounded-full bg-[#eadfd8]/45 blur-3xl" />
         <div className="relative mx-auto max-w-3xl">
           <p className="text-xs uppercase tracking-[0.6em] text-[#a28773]">Crystal</p>
@@ -113,7 +113,7 @@ export default function CustomPage() {
               <div className={`${index % 2 === 0 ? "md:text-left" : "md:mt-24 md:text-left"} relative min-h-40`} key={step.number}>
                 <span
                   className={`mb-8 grid h-12 w-12 place-items-center rounded-full border border-[#d8bfb4] bg-white font-serif text-sm text-[#9d7d63] shadow-sm md:absolute md:top-0 ${
-                    index % 2 === 0 ? "md:right-[-4.5rem]" : "md:left-[-4.5rem]"
+                    index % 2 === 0 ? "md:-right-18" : "md:-left-18"
                   }`}
                 >
                   {step.number}

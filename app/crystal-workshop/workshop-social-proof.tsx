@@ -28,7 +28,7 @@ export function WorkshopSocialProof() {
         <div className="mx-auto mt-8 grid max-w-5xl gap-5 md:grid-cols-3">
           {workshopTestimonials.map((testimonial) => (
             <div
-              className="rounded-md border border-white/12 bg-white/[0.04] p-6 backdrop-blur transition duration-300 hover:border-crystal-gold/50 hover:bg-white/[0.07]"
+              className="rounded-md border border-white/12 bg-white/4 p-6 backdrop-blur transition duration-300 hover:border-crystal-gold/50 hover:bg-white/[0.07]"
               key={testimonial.name}
             >
               <div className="flex gap-0.5 text-crystal-gold">

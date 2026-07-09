@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ProductCard } from "@/components/product-card";
 import { ProductSortSelect } from "@/components/product-sort-select";
+import { Reveal } from "@/components/reveal";
 import { modules } from "@/config/modules";
 import { productCategoryLabels, type Category } from "@/src/domain/product";
 import { listProducts, productSortOptions } from "@/services/product-service";
@@ -51,8 +52,10 @@ export default async function ProductsPage({
           {modules.product.sortControls ? <ProductSortSelect category={category} options={productSortOptions} value={sort} /> : null}
         </div>
         <div className="mt-8 grid gap-x-5 gap-y-10 sm:grid-cols-2 lg:grid-cols-4">
-          {products.map((product) => (
-            <ProductCard product={product} key={product.id} />
+          {products.map((product, index) => (
+            <Reveal delay={(index % 4) * 80} key={product.id}>
+              <ProductCard product={product} />
+            </Reveal>
           ))}
         </div>
       </div>

@@ -16,10 +16,10 @@ export function WorkshopTabs({ experiences }: { experiences: WorkshopExperience[
 
   return (
     <Tabs className="flex flex-col gap-8" defaultValue={experiences[0].id}>
-      <TabsList className="h-auto w-full flex-wrap justify-start gap-x-6 gap-y-3 rounded-none border-y border-crystal-line bg-transparent p-0 py-4">
+      <TabsList className="h-auto! w-full flex-wrap justify-start gap-x-6 gap-y-3 rounded-none border-y border-crystal-line bg-transparent p-0 py-4">
         {experiences.map((experience) => (
           <TabsTrigger
-            className="h-auto rounded-none border-b border-transparent bg-transparent px-1 pb-2 text-xs text-crystal-muted shadow-none transition hover:border-crystal-gold hover:text-crystal-ink data-[state=active]:border-crystal-gold data-[state=active]:bg-transparent data-[state=active]:text-crystal-ink"
+            className="h-auto rounded-none border-t-0 border-x-0 border-b border-transparent bg-transparent px-1 pb-2 text-xs text-crystal-muted shadow-none! transition hover:border-crystal-gold hover:text-crystal-ink data-[state=active]:border-crystal-gold data-[state=active]:bg-transparent data-[state=active]:text-crystal-ink data-[state=active]:shadow-none!"
             key={experience.id}
             value={experience.id}
           >
@@ -45,7 +45,7 @@ export function WorkshopTabs({ experiences }: { experiences: WorkshopExperience[
           >
             <div className="mx-auto w-full max-w-sm lg:mx-0">
               <div className="rotate-[-1.5deg] rounded-sm border border-crystal-line bg-white p-3 pb-8 shadow-soft transition duration-500 hover:rotate-0">
-                <div className="relative aspect-[4/5] overflow-hidden rounded-[2px]">
+                <div className="relative aspect-4/5 overflow-hidden rounded-[2px]">
                   <Image
                     alt={experience.image.alt}
                     className="object-cover"

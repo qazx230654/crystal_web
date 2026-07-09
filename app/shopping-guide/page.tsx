@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { guideSections } from "@/data/site";
+import { GuideNav } from "./guide-nav";
 
 export default function ShoppingGuidePage() {
   return (
@@ -9,13 +10,7 @@ export default function ShoppingGuidePage() {
       </div>
       <p className="mt-8 text-xs font-bold uppercase tracking-[0.32em] text-crystal-rose">Shopping Guide</p>
       <h1 className="mt-3 font-serif text-5xl font-semibold">購物說明</h1>
-      <nav className="mt-8 flex flex-wrap gap-x-6 gap-y-3 border-y border-crystal-line py-4">
-        {guideSections.map((section) => (
-          <a className="border-b border-transparent px-1 pb-2 text-xs text-crystal-muted transition hover:border-crystal-gold hover:text-crystal-ink" href={`#${section.id}`} key={section.id}>
-            {section.title}
-          </a>
-        ))}
-      </nav>
+      <GuideNav sections={guideSections} />
       <div className="mt-10 grid gap-5">
         {guideSections.map((section) => (
           <article className="scroll-mt-24 rounded-md border border-crystal-line bg-white/72 p-7 shadow-soft" id={section.id} key={section.id}>

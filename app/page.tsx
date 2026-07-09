@@ -1,12 +1,18 @@
+import type { CSSProperties } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, Star } from "lucide-react";
 import { FeaturedProductsCarousel } from "@/components/featured-products-carousel";
+import { Reveal } from "@/components/reveal";
 import { Button } from "@/components/ui/button";
 import { ShimmerButton } from "@/components/ui/shimmer-button";
 import { modules } from "@/config/modules";
 import { categoryHighlights, customPlans } from "@/data/site";
 import { listProducts } from "@/services/product-service";
+
+function heroDelay(ms: number): CSSProperties {
+  return { "--hero-delay": `${ms}ms` } as CSSProperties;
+}
 
 export const dynamic = "force-dynamic";
 
@@ -25,19 +31,19 @@ export default async function HomePage() {
         </div>
 
         <div className="container-shell relative z-10 grid min-h-[calc(100vh-112px)] items-center gap-12 py-20 lg:grid-cols-[1.02fr_0.98fr]">
-          <div className="luxury-reveal">
-            <p className="luxury-eyebrow">Energy Atelier</p>
-            <h1 className="mt-5 font-serif text-[2.65rem] font-semibold leading-[1.08] text-crystal-ink md:text-6xl">
+          <div>
+            <p className="luxury-eyebrow hero-fade" style={heroDelay(0)}>Energy Atelier</p>
+            <h1 className="mt-5 font-serif text-[2.65rem] font-semibold leading-[1.08] text-crystal-ink hero-fade md:text-6xl" style={heroDelay(120)}>
               與你的頻率相遇
               <span className="block text-crystal-gold">
                 讓晶石
                 <span className="block">成為日常光感</span>
               </span>
             </h1>
-            <p className="mt-6 max-w-xl text-[15px] leading-8 text-crystal-muted">
+            <p className="mt-6 max-w-xl text-[15px] leading-8 text-crystal-muted hero-fade" style={heroDelay(280)}>
               以天然晶石承載愛情、財運與內在安定的祈願，為每一天選一段更靠近自己的能量節奏。
             </p>
-            <div className="mt-8 flex flex-wrap gap-3">
+            <div className="mt-8 flex flex-wrap gap-3 hero-fade" style={heroDelay(420)}>
               <Button asChild size="lg">
                 <Link href="/products?category=monthly">探索限量作品</Link>
               </Button>
@@ -45,7 +51,7 @@ export default async function HomePage() {
                 <Link href="/custom">預約專屬配置</Link>
               </Button>
             </div>
-            <div className="mt-10 grid max-w-xl grid-cols-3 gap-3">
+            <div className="mt-10 grid max-w-xl grid-cols-3 gap-3 hero-fade" style={heroDelay(540)}>
               {["10,000+ 滿意顧客", "4.9 平均評分", "100% 天然晶石"].map((stat) => (
                 <div className="rounded-md border border-crystal-champagne/70 bg-white/64 p-4 text-sm font-semibold text-crystal-ink shadow-[0_14px_34px_rgba(90,65,55,0.06)] backdrop-blur" key={stat}>
                   {stat}
@@ -54,7 +60,7 @@ export default async function HomePage() {
             </div>
           </div>
           <div className="relative">
-            <div className="hero-image-frame relative aspect-[4/5] overflow-hidden rounded-md border border-crystal-champagne/70 bg-crystal-pearl shadow-soft">
+            <div className="hero-image-frame hero-visual-reveal relative aspect-4/5 overflow-hidden rounded-md border border-crystal-champagne/70 bg-crystal-pearl shadow-soft" style={heroDelay(180)}>
               <Image
                 alt="水晶手鍊"
                 className="object-cover"
@@ -64,7 +70,7 @@ export default async function HomePage() {
                 src="https://goodaytarot.com/images/about-crystal.jpg"
               />
             </div>
-            <div className="absolute -bottom-5 left-6 right-6 rounded-md border border-crystal-champagne/70 bg-white/88 p-5 shadow-soft backdrop-blur">
+            <div className="absolute -bottom-5 left-6 right-6 rounded-md border border-crystal-champagne/70 bg-white/88 p-5 shadow-soft backdrop-blur hero-fade" style={heroDelay(620)}>
               <p className="luxury-eyebrow">Daily Alignment</p>
               <p className="mt-2 text-sm leading-6 text-crystal-muted">讓晶石的光澤，安靜提醒你回到最適合自己的步調。</p>
             </div>
@@ -84,12 +90,23 @@ export default async function HomePage() {
         <div className="home-panel-ambient" aria-hidden="true" />
         <div className="container-shell relative z-10">
           <div className="grid gap-4 md:grid-cols-4">
-            {categoryHighlights.map((item) => (
-              <Link className="rounded-md luxury-surface p-6 transition duration-500 hover:-translate-y-1" href={item.href} key={item.title}>
-                <item.icon className="text-crystal-gold" size={26} />
-                <h3 className="mt-8 text-[11px] font-bold uppercase tracking-[0.24em] text-crystal-muted">{item.title}</h3>
-                <p className="mt-2 font-serif text-xl font-semibold">{item.label}</p>
-              </Link>
+            {categoryHighlights.map((item, index) => (
+              <Reveal
+                as={Link}
+                className="rounded-md luxury-surface p-6 transition duration-500 hover:-translate-y-1"
+                delay={index * 80}
+                href={item.href}
+                key={item.title}
+                variant="group"
+              >
+                <span className="reveal-item block" style={{ "--reveal-item-delay": `${index * 80}ms` } as CSSProperties}>
+                  <item.icon className="text-crystal-gold" size={26} />
+                </span>
+                <span className="reveal-item block" style={{ "--reveal-item-delay": `${index * 80 + 100}ms` } as CSSProperties}>
+                  <h3 className="mt-8 text-[11px] font-bold uppercase tracking-[0.24em] text-crystal-muted">{item.title}</h3>
+                  <p className="mt-2 font-serif text-xl font-semibold">{item.label}</p>
+                </span>
+              </Reveal>
             ))}
           </div>
         </div>
