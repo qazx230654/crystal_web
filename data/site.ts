@@ -2,7 +2,7 @@ import { Heart, Shield, Sparkles, WalletCards } from "lucide-react";
 
 export const navLinks = [
   { label: "每月限量", href: "/products?category=monthly" },
-  { label: "水晶創業班", href: "/crystal-workshop" },
+  { label: "預約體驗", href: "/crystal-workshop" },
   { label: "購物說明", href: "/shopping-guide" },
   { label: "訂單查詢", href: "/order-lookup" },
   { label: "品牌故事", href: "/about" }

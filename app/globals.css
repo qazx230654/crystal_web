@@ -72,6 +72,21 @@ select {
   animation: luxuryReveal 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) both;
 }
 
+.tab-panel-reveal {
+  animation: tabPanelReveal 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+@keyframes tabPanelReveal {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .hero-stage {
   background:
     linear-gradient(135deg, rgba(255, 250, 246, 0.96) 0%, rgba(247, 238, 229, 0.86) 46%, rgba(255, 252, 247, 0.94) 100%);

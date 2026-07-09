@@ -72,7 +72,7 @@ export default async function HomePage() {
         </div>
       </section> : null}
 
-      {modules.home.energyMarquee ? <section className="overflow-hidden bg-crystal-ink py-3 text-sm font-medium text-crystal-cream">
+      {modules.home.energyMarquee ? <section className="overflow-hidden border-y border-crystal-gold/25 bg-white/92 py-3 text-sm font-medium text-crystal-gold">
         <div className="marquee-track flex w-max gap-12">
           {Array.from({ length: 8 }).map((_, index) => (
             <span key={index}>天然晶石 · 溫柔淨化 · 手作配置 · 關係祝福 · 豐盛流動 · 內在安定 ·</span>
