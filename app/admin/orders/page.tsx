@@ -164,7 +164,7 @@ export default function AdminOrdersPage() {
       />
 
       <div className="mt-6 overflow-hidden rounded-md border border-crystal-line bg-white/72 shadow-soft">
-        <div className="grid grid-cols-[1.05fr_0.72fr_0.9fr_0.95fr_1.12fr_44px] gap-3 border-b border-crystal-line px-5 py-3 text-xs font-bold tracking-[0.16em] text-crystal-muted">
+        <div className="hidden grid-cols-[1.05fr_0.72fr_0.9fr_0.95fr_1.12fr_44px] gap-3 border-b border-crystal-line px-5 py-3 text-xs font-bold tracking-[0.16em] text-crystal-muted lg:grid">
           <span>訂單</span>
           <span>顧客</span>
           <span>金額</span>

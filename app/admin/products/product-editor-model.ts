@@ -1,5 +1,18 @@
-import { defaultStockLabelForStatus, type ProductStatus } from "@/src/domain/product";
+import type { ProductStatus } from "@/src/domain/product";
 import type { ProductFormState, ProductOptions } from "./product-editor-sections";
+
+export type StockType = "instock" | "limited";
+
+export function buildStockLabel(stockType: StockType, stockDays: string) {
+  const days = String(Math.max(1, Math.floor(Number(stockDays)) || 1));
+  return stockType === "limited" ? `限量商品 ${days} 個工作天寄出` : `現貨 ${days} 個工作天寄出`;
+}
+
+export function parseStockLabel(label: string): { stockDays: string; stockType: StockType } {
+  const stockType: StockType = label.includes("限量") ? "limited" : "instock";
+  const match = label.match(/\d+/);
+  return { stockDays: match ? match[0] : "3", stockType };
+}
 
 export type AdminProduct = {
   id: string;
@@ -49,7 +62,9 @@ export const defaultFormState: ProductFormState = {
   price: "",
   slug: "",
   status: "active",
-  stockLabel: defaultStockLabelForStatus("active")
+  stockDays: "3",
+  stockLabel: buildStockLabel("instock", "3"),
+  stockType: "instock"
 };
 
 export function parseProductList(value: string) {
@@ -79,7 +94,7 @@ export function validateProductForm(input: {
   if (!formState.category.length) return "請至少勾選一個分類";
   if (!formState.minerals.length && !parseProductList(formState.customMinerals).length) return "請至少勾選或輸入一種礦石";
   if (!formState.description.trim()) return "請輸入商品描述";
-  if (!formState.stockLabel.trim()) return "請輸入出貨或庫存文字";
+  if (!formState.stockDays || Number(formState.stockDays) <= 0) return "請輸入預計出貨天數";
   if (!formState.image && !input.hasMainImageFile) return "請上傳商品主圖";
   return null;
 }

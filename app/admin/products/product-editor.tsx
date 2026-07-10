@@ -10,6 +10,7 @@ import {
   isOptionsPayload,
   isSingleProductPayload,
   parseProductList,
+  parseStockLabel,
   validateProductForm,
   type ProductPayload,
   type SingleProductPayload
@@ -75,6 +76,8 @@ export function ProductEditor({ productId }: { productId?: string }) {
       }
 
       const product = productPayload.data;
+      const stockLabel = product.stockLabel ?? defaultStockLabelForStatus((product.status as ProductStatus | undefined) ?? "active");
+      const { stockDays, stockType } = parseStockLabel(stockLabel);
       setDeletedAt(product.deletedAt ?? null);
       setFormState({
         benefits: product.benefits ?? [],
@@ -90,7 +93,9 @@ export function ProductEditor({ productId }: { productId?: string }) {
         price: String(product.price ?? ""),
         slug: product.slug ?? "",
         status: (product.status as ProductStatus | undefined) ?? "active",
-        stockLabel: product.stockLabel ?? defaultStockLabelForStatus((product.status as ProductStatus | undefined) ?? "active")
+        stockDays,
+        stockLabel,
+        stockType
       });
     }
 

@@ -34,7 +34,7 @@ export function OrderRow({
 
   return (
     <div className="border-b border-crystal-line">
-      <div className="grid grid-cols-[1.05fr_0.72fr_0.9fr_0.95fr_1.12fr_44px] items-stretch gap-3 px-5 py-4 text-sm">
+      <div className="grid gap-3 px-5 py-4 text-sm lg:grid-cols-[1.05fr_0.72fr_0.9fr_0.95fr_1.12fr_44px] lg:items-stretch">
         <div>
           <p className="font-semibold">{order.order_number}</p>
           <p className="text-xs text-crystal-muted">{new Date(order.created_at).toLocaleString("zh-TW")}</p>

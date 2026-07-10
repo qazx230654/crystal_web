@@ -4,6 +4,7 @@ import Link from "next/link";
 import type { Dispatch, SetStateAction } from "react";
 import { Button } from "@/components/ui/button";
 import { productStatusLabels, type ProductStatus } from "@/src/domain/product";
+import { buildStockLabel, type StockType } from "./product-editor-model";
 
 export type ProductOptions = {
   benefits: string[];
@@ -26,7 +27,9 @@ export type ProductFormState = {
   price: string;
   slug: string;
   status: ProductStatus;
+  stockDays: string;
   stockLabel: string;
+  stockType: StockType;
 };
 
 const fieldClass = "border border-crystal-line bg-white px-4 py-3 text-sm outline-crystal-rose";
@@ -95,8 +98,32 @@ export function BasicProductSection({
           </select>
         </label>
         <label className="grid gap-2">
-          <span className="text-xs font-bold tracking-[0.16em] text-crystal-muted">出貨/庫存文字 *</span>
-          <input className={fieldClass} onChange={(event) => setFormState((current) => ({ ...current, stockLabel: event.target.value }))} value={formState.stockLabel} />
+          <span className="text-xs font-bold tracking-[0.16em] text-crystal-muted">出貨方式 *</span>
+          <select
+            className={fieldClass}
+            onChange={(event) => {
+              const stockType = event.target.value as StockType;
+              setFormState((current) => ({ ...current, stockLabel: buildStockLabel(stockType, current.stockDays), stockType }));
+            }}
+            value={formState.stockType}
+          >
+            <option value="instock">現貨</option>
+            <option value="limited">限量</option>
+          </select>
+        </label>
+        <label className="grid gap-2">
+          <span className="text-xs font-bold tracking-[0.16em] text-crystal-muted">預計出貨天數 *</span>
+          <input
+            className={fieldClass}
+            min="1"
+            onChange={(event) => {
+              const stockDays = event.target.value;
+              setFormState((current) => ({ ...current, stockDays, stockLabel: buildStockLabel(current.stockType, stockDays) }));
+            }}
+            type="number"
+            value={formState.stockDays}
+          />
+          <span className="text-xs text-crystal-muted">前台顯示文字：{formState.stockLabel}</span>
         </label>
         <label className="grid gap-2 md:col-span-2">
           <span className="text-xs font-bold tracking-[0.16em] text-crystal-muted">商品描述 *</span>
