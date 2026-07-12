@@ -17,6 +17,14 @@ export function validateCheckoutCart(input: {
     return getUnavailableProductMessage(unavailableLine.product);
   }
 
+  const insufficientStockLine = input.latestLines.find((line) => {
+    const stockQuantity = line.product.stockQuantity;
+    return stockQuantity !== null && stockQuantity !== undefined && line.quantity > stockQuantity;
+  });
+  if (insufficientStockLine) {
+    return `商品「${insufficientStockLine.product.name}」庫存不足，剩餘 ${insufficientStockLine.product.stockQuantity} 件，請回到購物袋調整數量。`;
+  }
+
   const changedPriceLine = input.latestLines.find((line) => {
     const previousPrice = input.priceSnapshot[line.key];
     return previousPrice !== undefined && previousPrice !== line.product.price;

@@ -22,6 +22,8 @@ export function ProductPurchase({ product }: { product: Product }) {
   const { addItem } = useCart();
   const price = product.price + getClaspPriceDelta(clasp);
   const soldOut = !isProductSellable(product);
+  const isTrackingStock = product.stockQuantity !== null && product.stockQuantity !== undefined;
+  const maxQuantity = isTrackingStock ? Math.max(0, product.stockQuantity as number) : Infinity;
 
   return (
     <div>
@@ -81,7 +83,12 @@ export function ProductPurchase({ product }: { product: Product }) {
               <Minus size={15} />
             </button>
             <span className="w-10 text-center">{quantity}</span>
-            <button className="grid h-11 w-11 place-items-center" onClick={() => setQuantity((value) => value + 1)} type="button">
+            <button
+              className="grid h-11 w-11 place-items-center disabled:cursor-not-allowed disabled:opacity-40"
+              disabled={quantity >= maxQuantity}
+              onClick={() => setQuantity((value) => Math.min(maxQuantity, value + 1))}
+              type="button"
+            >
               <Plus size={15} />
             </button>
           </div>
@@ -97,7 +104,10 @@ export function ProductPurchase({ product }: { product: Product }) {
             {soldOut ? "目前售完" : "加入購物袋"}
           </button>
         </div>
-        <p className="rounded-md border border-crystal-line bg-white/72 p-4 text-sm text-crystal-muted">出貨時間：{product.stockLabel}</p>
+        <p className="rounded-md border border-crystal-line bg-white/72 p-4 text-sm text-crystal-muted">
+          出貨時間：{product.stockLabel}
+          {isTrackingStock && !soldOut ? `・剩餘 ${product.stockQuantity} 件` : ""}
+        </p>
       </div>
     </div>
   );

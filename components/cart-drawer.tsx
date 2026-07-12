@@ -33,26 +33,37 @@ export function CartDrawer() {
         {lines.length ? (
           <>
             <div className="flex-1 space-y-4 overflow-auto p-6">
-              {lines.map((line) => (
-                <div className="flex gap-4 rounded-md border border-crystal-line bg-white/72 p-3" key={line.key}>
-                  <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-md bg-crystal-pearl">
-                    <Image alt={line.product.name} fill className="object-cover" src={line.product.image} sizes="80px" />
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="font-medium">{line.product.name}</p>
-                    <p className="mt-1 text-sm text-crystal-muted">NT$ {line.product.price.toLocaleString()}</p>
-                    <div className="mt-3 inline-flex items-center rounded-full border border-crystal-line bg-crystal-cream">
-                      <button className="grid h-8 w-8 place-items-center" onClick={() => updateQuantity(line.key, line.quantity - 1)} type="button">
-                        <Minus size={14} />
-                      </button>
-                      <span className="w-8 text-center text-sm">{line.quantity}</span>
-                      <button className="grid h-8 w-8 place-items-center" onClick={() => updateQuantity(line.key, line.quantity + 1)} type="button">
-                        <Plus size={14} />
-                      </button>
+              {lines.map((line) => {
+                const isTrackingStock = line.product.stockQuantity !== null && line.product.stockQuantity !== undefined;
+                const maxQuantity = isTrackingStock ? Math.max(0, line.product.stockQuantity as number) : Infinity;
+
+                return (
+                  <div className="flex gap-4 rounded-md border border-crystal-line bg-white/72 p-3" key={line.key}>
+                    <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-md bg-crystal-pearl">
+                      <Image alt={line.product.name} fill className="object-cover" src={line.product.image} sizes="80px" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="font-medium">{line.product.name}</p>
+                      <p className="mt-1 text-sm text-crystal-muted">NT$ {line.product.price.toLocaleString()}</p>
+                      <div className="mt-3 inline-flex items-center rounded-full border border-crystal-line bg-crystal-cream">
+                        <button className="grid h-8 w-8 place-items-center" onClick={() => updateQuantity(line.key, line.quantity - 1)} type="button">
+                          <Minus size={14} />
+                        </button>
+                        <span className="w-8 text-center text-sm">{line.quantity}</span>
+                        <button
+                          className="grid h-8 w-8 place-items-center disabled:cursor-not-allowed disabled:opacity-40"
+                          disabled={line.quantity >= maxQuantity}
+                          onClick={() => updateQuantity(line.key, Math.min(maxQuantity, line.quantity + 1))}
+                          type="button"
+                        >
+                          <Plus size={14} />
+                        </button>
+                      </div>
+                      {isTrackingStock ? <p className="mt-2 text-xs text-crystal-muted">庫存剩餘 {line.product.stockQuantity} 件</p> : null}
                     </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
             <div className="border-t border-crystal-line p-6">
               <div className="mb-4 flex items-center justify-between text-lg font-semibold">

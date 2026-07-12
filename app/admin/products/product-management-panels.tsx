@@ -21,6 +21,7 @@ export type AdminProduct = {
   image: string;
   description: string;
   stockLabel: string;
+  stockQuantity?: number | null;
   deletedAt?: string | null;
   status?: ProductStatus;
 };
@@ -190,6 +191,9 @@ function ProductRow({
         </span>
         {product.deletedAt ? <span className="text-xs text-amber-700">封存於 {formatDateTime(product.deletedAt)}</span> : null}
         <span className="text-xs text-crystal-muted">{product.stockLabel}</span>
+        <span className="text-xs text-crystal-muted">
+          庫存：{product.stockQuantity === null || product.stockQuantity === undefined ? "未追蹤" : `${product.stockQuantity} 件`}
+        </span>
       </div>
       <div className="grid gap-2">
         <select className="border border-crystal-line bg-white px-3 py-2 text-xs outline-crystal-rose" onChange={(event) => onStatusChange(product.id, event.target.value as ProductStatus)} value={product.status ?? "active"}>

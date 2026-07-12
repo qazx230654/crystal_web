@@ -45,6 +45,7 @@ export async function POST(request: Request) {
       slug?: string;
       status?: ProductStatus;
       stockLabel?: string;
+      stockQuantity?: number | null;
     };
 
     const validationError = validateProductPayload(payload);
@@ -62,7 +63,8 @@ export async function POST(request: Request) {
       price: Number(payload.price),
       slug: payload.slug,
       status: payload.status ?? "active",
-      stockLabel: payload.stockLabel?.trim() || defaultStockLabelForStatus(payload.status ?? "active")
+      stockLabel: payload.stockLabel?.trim() || defaultStockLabelForStatus(payload.status ?? "active"),
+      stockQuantity: payload.stockQuantity ?? null
     });
 
     return NextResponse.json({ data: product }, { status: 201 });

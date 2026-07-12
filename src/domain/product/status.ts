@@ -72,20 +72,26 @@ export function isProductVisible(product: Pick<Product, "deletedAt" | "status">)
   return status === "active" || status === "soldout";
 }
 
-export function isProductSellable(product: Pick<Product, "deletedAt" | "status">) {
-  return !product.deletedAt && (product.status ?? "active") === "active";
+export function isProductSellable(product: Pick<Product, "deletedAt" | "status" | "stockQuantity">) {
+  if (product.deletedAt || (product.status ?? "active") !== "active") return false;
+  if (isOutOfTrackedStock(product)) return false;
+  return true;
 }
 
-export function getUnavailableProductMessage(product: Pick<Product, "deletedAt" | "name" | "status">) {
+export function getUnavailableProductMessage(product: Pick<Product, "deletedAt" | "name" | "status" | "stockQuantity">) {
   if (product.deletedAt || product.status === "hidden" || product.status === "draft") {
     return `商品「${product.name}」目前未上架，請從購物袋移除後重新確認。`;
   }
 
-  if (product.status === "soldout") {
+  if (product.status === "soldout" || isOutOfTrackedStock(product)) {
     return `商品「${product.name}」目前庫存不足，請從購物袋移除後重新確認。`;
   }
 
   return null;
+}
+
+function isOutOfTrackedStock(product: Pick<Product, "stockQuantity">) {
+  return product.stockQuantity !== null && product.stockQuantity !== undefined && product.stockQuantity <= 0;
 }
 
 export function decodeStoredStockLabel(value?: string | null): { status: ProductStatus; stockLabel: string } {

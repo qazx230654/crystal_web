@@ -15,6 +15,7 @@ import {
   notifyPaymentConfirmed
 } from "./order-notification.service";
 import { increaseProductSales } from "./order-sales.service";
+import { releaseStock } from "./stock.service";
 import type { OrderRecord } from "./types";
 
 export async function updateOrderWorkflowAction(id: string, action: AdminOrderAction, message?: string) {
@@ -130,6 +131,10 @@ export async function updateOrderWorkflowAction(id: string, action: AdminOrderAc
     });
   }
 
+  if (action === "cancel_order") {
+    await releaseStock(normalizeOrderItems(result.items));
+  }
+
   return order;
 }
 
@@ -186,6 +191,10 @@ export async function updateOrderWorkflow(id: string, input: { message?: string;
       items: normalizeOrderItems(result.items),
       order
     });
+  }
+
+  if (input.status === "cancelled") {
+    await releaseStock(normalizeOrderItems(result.items));
   }
 
   return order;

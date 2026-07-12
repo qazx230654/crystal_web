@@ -75,6 +75,7 @@ function normalizeSupabaseProduct(row: SupabaseProductRow): Product | null {
     images,
     description: row.description ?? "",
     stockLabel: parsedStatus.stockLabel,
+    stockQuantity: row.stock_quantity ?? null,
     sales: Number(row.sales ?? 0),
     createdAt: row.created_at ?? new Date().toISOString().slice(0, 10),
     deletedAt: row.deleted_at,

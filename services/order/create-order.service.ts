@@ -7,6 +7,7 @@ import {
   resolveOrderShippingFee,
   validateOrderInput
 } from "./shipping.service";
+import { releaseStock, reserveStock } from "./stock.service";
 import type { CreateOrderInput } from "./types";
 
 export async function createOrder(input: CreateOrderInput) {
@@ -37,9 +38,16 @@ export async function createOrder(input: CreateOrderInput) {
     ...(input.userId ? { user_id: input.userId } : {})
   };
 
-  const order = await orderRepository.createOrder(orderBody);
+  await reserveStock(items.map((item) => ({ product_id: item.product_id, product_name: item.product_name, quantity: item.quantity })));
 
-  await orderRepository.createOrderItems(items.map((item) => ({ ...item, order_id: order.id })));
+  let order: Awaited<ReturnType<typeof orderRepository.createOrder>>;
+  try {
+    order = await orderRepository.createOrder(orderBody);
+    await orderRepository.createOrderItems(items.map((item) => ({ ...item, order_id: order.id })));
+  } catch (error) {
+    await releaseStock(items.map((item) => ({ product_id: item.product_id, product_name: item.product_name, quantity: item.quantity })));
+    throw error;
+  }
 
   await orderRepository.createOrderEvent({
     order_id: order.id,

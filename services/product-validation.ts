@@ -14,6 +14,7 @@ export type AdminProductPayload = {
   slug?: string;
   status?: ProductStatus;
   stockLabel?: string;
+  stockQuantity?: number | null;
 };
 
 export function validateProductPayload(payload: AdminProductPayload) {
@@ -40,6 +41,11 @@ export function validateProductPayload(payload: AdminProductPayload) {
   }
   if (payload.originalPrice && Number(payload.originalPrice) < Number(payload.price)) {
     return NextResponse.json({ error: { message: "原價不可低於折扣價格" } }, { status: 400 });
+  }
+  if (payload.stockQuantity !== undefined && payload.stockQuantity !== null) {
+    if (!Number.isInteger(payload.stockQuantity) || payload.stockQuantity < 0) {
+      return NextResponse.json({ error: { message: "庫存數量需為 0 或以上的整數" } }, { status: 400 });
+    }
   }
 
   return null;

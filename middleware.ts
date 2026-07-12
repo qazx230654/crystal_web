@@ -18,14 +18,15 @@ export async function middleware(request: NextRequest) {
 async function isAdminRequest(request: NextRequest) {
   const accessToken = request.cookies.get(authAccessCookieName)?.value;
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const supabaseAuthKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-  if (!accessToken || !supabaseUrl || !supabaseKey) return false;
+  if (!accessToken || !supabaseUrl || !supabaseAuthKey || !supabaseServiceRoleKey) return false;
 
   const userResponse = await fetch(`${supabaseUrl}/auth/v1/user`, {
     cache: "no-store",
     headers: {
-      apikey: supabaseKey,
+      apikey: supabaseAuthKey,
       Authorization: `Bearer ${accessToken}`
     }
   });
@@ -39,8 +40,8 @@ async function isAdminRequest(request: NextRequest) {
   const profileResponse = await fetch(`${supabaseUrl}/rest/v1/profiles?id=eq.${encodeURIComponent(userId)}&select=role,status`, {
     cache: "no-store",
     headers: {
-      apikey: supabaseKey,
-      Authorization: `Bearer ${supabaseKey}`
+      apikey: supabaseServiceRoleKey,
+      Authorization: `Bearer ${supabaseServiceRoleKey}`
     }
   });
 

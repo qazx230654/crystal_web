@@ -78,6 +78,7 @@ export function ProductEditor({ productId }: { productId?: string }) {
       const product = productPayload.data;
       const stockLabel = product.stockLabel ?? defaultStockLabelForStatus((product.status as ProductStatus | undefined) ?? "active");
       const { stockDays, stockType } = parseStockLabel(stockLabel);
+      const trackStock = product.stockQuantity !== null && product.stockQuantity !== undefined;
       setDeletedAt(product.deletedAt ?? null);
       setFormState({
         benefits: product.benefits ?? [],
@@ -95,7 +96,9 @@ export function ProductEditor({ productId }: { productId?: string }) {
         status: (product.status as ProductStatus | undefined) ?? "active",
         stockDays,
         stockLabel,
-        stockType
+        stockQuantity: trackStock ? String(product.stockQuantity) : "",
+        stockType,
+        trackStock
       });
     }
 
@@ -160,7 +163,8 @@ export function ProductEditor({ productId }: { productId?: string }) {
           price: Number(formState.price),
           ...(productId ? { slug: formState.slug || undefined } : {}),
           status: formState.status,
-          stockLabel: formState.stockLabel
+          stockLabel: formState.stockLabel,
+          stockQuantity: formState.trackStock ? Number(formState.stockQuantity) : null
         }),
         headers: { "Content-Type": "application/json" },
         method: productId ? "PATCH" : "POST"

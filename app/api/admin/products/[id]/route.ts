@@ -44,6 +44,7 @@ export async function PATCH(request: Request, { params }: { params: { id: string
       slug?: string;
       status?: ProductStatus;
       stockLabel?: string;
+      stockQuantity?: number | null;
       action?: "archive" | "restore";
     };
 
@@ -80,7 +81,8 @@ export async function PATCH(request: Request, { params }: { params: { id: string
       price: Number(payload.price),
       slug: payload.slug,
       status: payload.status,
-      stockLabel: payload.stockLabel ?? ""
+      stockLabel: payload.stockLabel ?? "",
+      stockQuantity: payload.stockQuantity ?? null
     });
     return NextResponse.json({ data: product });
   } catch (error) {

@@ -15,6 +15,7 @@ export type SupabaseProductInput = {
   slug?: string;
   status: ProductStatus;
   stockLabel: string;
+  stockQuantity?: number | null;
 };
 
 export async function createSupabaseProduct(input: SupabaseProductInput) {
@@ -31,6 +32,7 @@ export async function createSupabaseProduct(input: SupabaseProductInput) {
     images: input.images.length ? input.images : [input.image.trim()],
     description: input.description.trim(),
     stock_label: encodeStoredStockLabel(input.stockLabel, input.status),
+    stock_quantity: input.stockQuantity ?? null,
     sales: 0,
     created_at: new Date().toISOString().slice(0, 10)
   };
@@ -51,7 +53,8 @@ export async function updateSupabaseProduct(id: string, input: SupabaseProductIn
     image: input.image.trim(),
     images: input.images.length ? input.images : [input.image.trim()],
     description: input.description.trim(),
-    stock_label: encodeStoredStockLabel(input.stockLabel, input.status)
+    stock_label: encodeStoredStockLabel(input.stockLabel, input.status),
+    stock_quantity: input.stockQuantity ?? null
   };
 
   const product = await productRepository.updateProduct(id, payload);

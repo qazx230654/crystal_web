@@ -28,6 +28,7 @@ export type Product = {
   images?: string[];
   description: string;
   stockLabel: string;
+  stockQuantity?: number | null;
   sales: number;
   createdAt: string;
   deletedAt?: string | null;

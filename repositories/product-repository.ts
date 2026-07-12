@@ -14,6 +14,7 @@ export type SupabaseProductRow = {
   images: string[] | null;
   description: string | null;
   stock_label: string | null;
+  stock_quantity: number | null;
   sales: number | null;
   created_at: string | null;
   deleted_at: string | null;
@@ -33,6 +34,7 @@ export type ProductInsertRecord = {
   sales?: number;
   slug: string;
   stock_label: string;
+  stock_quantity?: number | null;
 };
 
 export type ProductUpdateRecord = Omit<ProductInsertRecord, "created_at" | "sales">;
@@ -104,6 +106,22 @@ export class ProductRepository {
     });
 
     return product;
+  }
+
+  async getStockQuantity(id: string) {
+    const [product] = await supabaseRest<Array<{ id: string; stock_quantity: number | null }>>("products", {
+      query: `?id=eq.${encodeURIComponent(id)}&select=id,stock_quantity`
+    });
+
+    return product ?? null;
+  }
+
+  async setStockQuantity(id: string, expectedCurrent: number, nextValue: number) {
+    return supabaseRest<Array<{ id: string; stock_quantity: number | null }>>("products", {
+      body: { stock_quantity: nextValue },
+      method: "PATCH",
+      query: `?id=eq.${encodeURIComponent(id)}&stock_quantity=eq.${expectedCurrent}`
+    });
   }
 
   async findProductSalesById(id: string) {

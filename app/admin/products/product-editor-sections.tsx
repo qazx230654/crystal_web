@@ -29,7 +29,9 @@ export type ProductFormState = {
   status: ProductStatus;
   stockDays: string;
   stockLabel: string;
+  stockQuantity: string;
   stockType: StockType;
+  trackStock: boolean;
 };
 
 const fieldClass = "border border-crystal-line bg-white px-4 py-3 text-sm outline-crystal-rose";
@@ -125,6 +127,30 @@ export function BasicProductSection({
           />
           <span className="text-xs text-crystal-muted">前台顯示文字：{formState.stockLabel}</span>
         </label>
+        <label className="grid gap-2">
+          <span className="text-xs font-bold tracking-[0.16em] text-crystal-muted">庫存管理</span>
+          <span className="flex items-center gap-2 border border-crystal-line bg-white px-4 py-3 text-sm">
+            <input
+              checked={formState.trackStock}
+              onChange={(event) => setFormState((current) => ({ ...current, trackStock: event.target.checked }))}
+              type="checkbox"
+            />
+            追蹤庫存數量
+          </span>
+        </label>
+        {formState.trackStock ? (
+          <label className="grid gap-2">
+            <span className="text-xs font-bold tracking-[0.16em] text-crystal-muted">庫存數量 *</span>
+            <input
+              className={fieldClass}
+              min="0"
+              onChange={(event) => setFormState((current) => ({ ...current, stockQuantity: event.target.value }))}
+              type="number"
+              value={formState.stockQuantity}
+            />
+            <span className="text-xs text-crystal-muted">數量歸零後，前台會自動顯示售完，不需手動切換商品狀態。</span>
+          </label>
+        ) : null}
         <label className="grid gap-2 md:col-span-2">
           <span className="text-xs font-bold tracking-[0.16em] text-crystal-muted">商品描述 *</span>
           <textarea className={`${fieldClass} min-h-32`} onChange={(event) => setFormState((current) => ({ ...current, description: event.target.value }))} value={formState.description} />

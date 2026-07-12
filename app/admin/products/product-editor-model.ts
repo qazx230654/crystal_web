@@ -27,6 +27,7 @@ export type AdminProduct = {
   images?: string[];
   description: string;
   stockLabel: string;
+  stockQuantity?: number | null;
   deletedAt?: string | null;
   status?: ProductStatus;
 };
@@ -64,7 +65,9 @@ export const defaultFormState: ProductFormState = {
   status: "active",
   stockDays: "3",
   stockLabel: buildStockLabel("instock", "3"),
-  stockType: "instock"
+  stockQuantity: "",
+  stockType: "instock",
+  trackStock: false
 };
 
 export function parseProductList(value: string) {
@@ -95,6 +98,9 @@ export function validateProductForm(input: {
   if (!formState.minerals.length && !parseProductList(formState.customMinerals).length) return "請至少勾選或輸入一種礦石";
   if (!formState.description.trim()) return "請輸入商品描述";
   if (!formState.stockDays || Number(formState.stockDays) <= 0) return "請輸入預計出貨天數";
+  if (formState.trackStock && (formState.stockQuantity.trim() === "" || Number(formState.stockQuantity) < 0 || !Number.isInteger(Number(formState.stockQuantity)))) {
+    return "請輸入正確的庫存數量（0 或以上的整數）";
+  }
   if (!formState.image && !input.hasMainImageFile) return "請上傳商品主圖";
   return null;
 }
