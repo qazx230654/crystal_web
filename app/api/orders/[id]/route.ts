@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getOrderById, updateOrderStatus, updateOrderWorkflowAction, type AdminOrderAction } from "@/services/order-service";
 import { SupabaseConfigError } from "@/services/supabase-rest";
-import { requireAdmin } from "@/services/admin-auth";
+import { requireAdminWrite } from "@/services/admin-auth";
 
 export const dynamic = "force-dynamic";
 
@@ -28,7 +28,7 @@ export async function GET(_request: Request, { params }: { params: { id: string 
 
 export async function PATCH(request: Request, { params }: { params: { id: string } }) {
   try {
-    const unauthorized = await requireAdmin(request);
+    const unauthorized = await requireAdminWrite(request);
     if (unauthorized) return unauthorized;
 
     const payload = await request.json();

@@ -50,7 +50,8 @@ async function isAdminRequest(request: NextRequest) {
   const profiles = await profileResponse.json().catch(() => []);
   const profile = Array.isArray(profiles) ? profiles[0] : null;
 
-  return profile?.role === "admin" && (profile.status ?? "active") === "active";
+  const status = profile?.status ?? "active";
+  return profile?.role === "admin" && (status === "active" || status === "demo");
 }
 
 export const config = {

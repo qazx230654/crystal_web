@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { defaultStockLabelForStatus, type Category, type ProductStatus } from "@/src/domain/product";
 import { getProductSource } from "@/data/product-source";
-import { requireAdmin } from "@/services/admin-auth";
+import { requireAdmin, requireAdminWrite } from "@/services/admin-auth";
 import { listProducts } from "@/services/product-service";
 import { getProductFormOptions } from "@/services/admin-product-store";
 import { createSupabaseProduct } from "@/services/supabase-product-service";
@@ -28,7 +28,7 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
-  const unauthorized = await requireAdmin(request);
+  const unauthorized = await requireAdminWrite(request);
   if (unauthorized) return unauthorized;
 
   try {

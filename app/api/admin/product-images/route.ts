@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { requireAdmin } from "@/services/admin-auth";
+import { requireAdminWrite } from "@/services/admin-auth";
 import { storageRepository } from "@/repositories/storage-repository";
 
 export const dynamic = "force-dynamic";
@@ -8,7 +8,7 @@ const allowedImageTypes = new Set(["image/jpeg", "image/png", "image/webp", "ima
 const maxImageSize = 6 * 1024 * 1024;
 
 export async function POST(request: Request) {
-  const unauthorized = await requireAdmin(request);
+  const unauthorized = await requireAdminWrite(request);
   if (unauthorized) return unauthorized;
 
   try {

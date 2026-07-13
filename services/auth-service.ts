@@ -155,11 +155,17 @@ export async function getCurrentMember(request: Request) {
   };
 }
 
-export async function isCurrentMemberAdmin(request: Request) {
+export async function getCurrentMemberAdminStatus(request: Request) {
   const member = await getCurrentMember(request);
   const profile = member?.profile;
+  const status = profile?.status ?? "active";
+  const isAdmin = Boolean(member?.user?.id && profile?.role === "admin" && (status === "active" || status === "demo"));
 
-  return Boolean(member?.user?.id && profile?.role === "admin" && (profile.status ?? "active") === "active");
+  return { isAdmin, isDemo: isAdmin && status === "demo" };
+}
+
+export async function isCurrentMemberAdmin(request: Request) {
+  return (await getCurrentMemberAdminStatus(request)).isAdmin;
 }
 
 export async function getAuthUser(accessToken: string) {

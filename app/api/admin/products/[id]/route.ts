@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { requireAdmin } from "@/services/admin-auth";
+import { requireAdmin, requireAdminWrite } from "@/services/admin-auth";
 import { type Category, type ProductStatus } from "@/src/domain/product";
 import { listProducts } from "@/services/product-service";
 import {
@@ -27,7 +27,7 @@ export async function GET(request: Request, { params }: { params: { id: string }
 }
 
 export async function PATCH(request: Request, { params }: { params: { id: string } }) {
-  const unauthorized = await requireAdmin(request);
+  const unauthorized = await requireAdminWrite(request);
   if (unauthorized) return unauthorized;
 
   try {

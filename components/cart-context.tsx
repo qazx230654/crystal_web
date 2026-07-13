@@ -30,6 +30,7 @@ type CartContextValue = {
   ) => void;
   clearCart: () => void;
   updateQuantity: (key: string, quantity: number) => void;
+  removeItem: (key: string) => void;
   refreshCartProducts: () => Promise<CartLine[]>;
   total: number;
   removedItemCount: number;
@@ -168,6 +169,9 @@ export function CartProvider({ children }: { children: ReactNode }) {
             .map((item) => (getCartItemKey(item) === key ? { ...item, quantity } : item))
             .filter((item) => item.quantity > 0)
         );
+      },
+      removeItem: (key) => {
+        setItems((current) => current.filter((item) => getCartItemKey(item) !== key));
       },
       refreshCartProducts: () => hydrateProducts(items),
       total,

@@ -2,11 +2,11 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { Minus, Plus, X } from "lucide-react";
+import { Minus, Plus, Trash2, X } from "lucide-react";
 import { useCart } from "@/components/cart-context";
 
 export function CartDrawer() {
-  const { closeCart, dismissRemovedItemNotice, isOpen, lines, removedItemCount, total, updateQuantity } = useCart();
+  const { closeCart, dismissRemovedItemNotice, isOpen, lines, removedItemCount, removeItem, total, updateQuantity } = useCart();
 
   if (!isOpen) return null;
 
@@ -43,7 +43,17 @@ export function CartDrawer() {
                       <Image alt={line.product.name} fill className="object-cover" src={line.product.image} sizes="80px" />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="font-medium">{line.product.name}</p>
+                      <div className="flex items-start justify-between gap-2">
+                        <p className="font-medium">{line.product.name}</p>
+                        <button
+                          aria-label="移除商品"
+                          className="grid h-7 w-7 shrink-0 place-items-center rounded-full text-crystal-muted transition hover:bg-crystal-cream hover:text-crystal-ink"
+                          onClick={() => removeItem(line.key)}
+                          type="button"
+                        >
+                          <Trash2 size={15} />
+                        </button>
+                      </div>
                       <p className="mt-1 text-sm text-crystal-muted">NT$ {line.product.price.toLocaleString()}</p>
                       <div className="mt-3 inline-flex items-center rounded-full border border-crystal-line bg-crystal-cream">
                         <button className="grid h-8 w-8 place-items-center" onClick={() => updateQuantity(line.key, line.quantity - 1)} type="button">

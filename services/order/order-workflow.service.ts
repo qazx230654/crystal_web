@@ -55,7 +55,7 @@ export async function updateOrderWorkflowAction(id: string, action: AdminOrderAc
     patch.logistics_provider = resolveLogisticsProvider(currentOrder.shipping_method);
     patch.tracking_number = `DEMO${Date.now().toString().slice(-10)}`;
     patch.logistics_print_url = null;
-    eventMessage = "物流單已建立（Demo，尚未串接綠界 API）";
+    eventMessage = "物流單已建立（出貨串接開發中，暫以系統編號代替）";
   }
 
   if (action === "mark_shipped") {
