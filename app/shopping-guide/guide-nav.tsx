@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 
-export function GuideNav({ sections }: { sections: { id: string; title: string }[] }) {
+export function GuideNav({ sections }: { sections: readonly { id: string; title: string }[] }) {
   const [activeId, setActiveId] = useState(sections[0]?.id);
 
   useEffect(() => {

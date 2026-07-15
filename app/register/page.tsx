@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FormEvent, useState } from "react";
 import { useAuth } from "@/components/auth-context";
+import { shopBrand } from "@/config/shop";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -59,9 +60,9 @@ export default function RegisterPage() {
       <div className="w-full max-w-[360px]">
         <div className="text-center">
           <Link className="font-serif text-2xl font-semibold tracking-[0.18em] text-crystal-ink" href="/">
-            Crystal
+            {shopBrand.name}
           </Link>
-          <p className="mt-2 text-[11px] font-bold uppercase tracking-[0.32em] text-crystal-muted">Crystal Energy</p>
+          <p className="mt-2 text-[11px] font-bold uppercase tracking-[0.32em] text-crystal-muted">{shopBrand.tagline}</p>
         </div>
 
         <div className="mt-8 border border-crystal-line bg-white p-8">

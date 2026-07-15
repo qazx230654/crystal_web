@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { FormEvent, useState } from "react";
+import { shopBrand } from "@/config/shop";
 
 export default function ForgotPasswordPage() {
   const [error, setError] = useState<string | null>(null);
@@ -36,9 +37,9 @@ export default function ForgotPasswordPage() {
     <section className="container-shell flex min-h-[70vh] items-center justify-center py-14">
       <div className="w-full max-w-md border border-crystal-line bg-white/76 p-8 shadow-soft">
         <Link className="font-serif text-2xl font-semibold text-crystal-ink" href="/">
-          Crystal
+          {shopBrand.name}
         </Link>
-        <p className="mt-2 text-xs font-bold uppercase tracking-[0.28em] text-crystal-muted">Crystal Energy</p>
+        <p className="mt-2 text-xs font-bold uppercase tracking-[0.28em] text-crystal-muted">{shopBrand.tagline}</p>
         <h1 className="mt-8 text-3xl font-semibold">忘記密碼</h1>
         <p className="mt-3 text-sm leading-6 text-crystal-muted">輸入註冊 Email，我們會寄送重設密碼連結給您。</p>
         <form className="mt-8 grid gap-5" onSubmit={handleSubmit}>

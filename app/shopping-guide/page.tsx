@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { shopBrand } from "@/config/shop";
 import { guideSections } from "@/data/site";
 import { GuideNav } from "./guide-nav";
 
@@ -31,7 +32,7 @@ export default function ShoppingGuidePage() {
             聯絡我們
           </Link>
           <button className="border border-crystal-gold/35 bg-white px-5 py-3 text-xs font-semibold tracking-[0.08em] text-crystal-muted" type="button">
-            問問24小時 Crystal 人工智能服務
+            問問24小時 {shopBrand.name} 人工智能服務
           </button>
         </div>
       </div>

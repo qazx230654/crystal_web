@@ -10,6 +10,7 @@ import { useCart } from "@/components/cart-context";
 import { useAuth } from "@/components/auth-context";
 import { contactLinks } from "@/config/contact";
 import { modules } from "@/config/modules";
+import { shopBrand, shopFooter, shopHome, shopNavbar } from "@/config/shop";
 
 export function AnnouncementMarquee() {
   if (!modules.chrome.announcementMarquee) {
@@ -20,7 +21,7 @@ export function AnnouncementMarquee() {
     <div className="overflow-hidden border-b border-crystal-gold/25 bg-white/92 py-2 text-[11px] font-medium tracking-[0.18em] text-crystal-gold">
       <div className="marquee-track flex w-max gap-12">
         {Array.from({ length: 16 }).map((_, index) => (
-          <span key={index}>任選兩件商品免運 · 天然晶石手作配置 · Crystal Energy ·</span>
+          <span key={index}>{shopHome.announcementMarquee}</span>
         ))}
       </div>
     </div>
@@ -38,11 +39,10 @@ export function Header() {
   const accountHref = member ? "/account" : "/login";
   const accountTitle = member ? "會員中心" : "會員登入";
 
-  const categoryMenu = [
-    { href: "/products", label: "查看全部商品", muted: "Shop all" },
-    { href: "/custom", label: "客製化方案", muted: "Custom plans" }
-  ];
-  const visibleNavLinks = navLinks.filter((link) => !["訂單查詢"].includes(link.label));
+  const categoryMenu = shopNavbar.categoryMenu;
+  const hiddenLabels = new Set<string>(shopNavbar.hiddenLabels);
+  const visibleNavLinks = navLinks.filter((link) => !hiddenLabels.has(link.label));
+  const primaryNavLink = navLinks[0];
 
   function openCategoryMenu() {
     if (categoryCloseTimer.current) {
@@ -73,9 +73,11 @@ export function Header() {
         <div className="container-shell relative z-20 flex h-16 items-center justify-between gap-4">
           <Brand />
           <nav className="hidden items-center gap-7 text-xs font-medium tracking-[0.08em] text-crystal-muted lg:flex">
-            <Link className="transition hover:text-crystal-gold" href="/products?category=monthly" onClick={() => setCategoryOpen(false)}>
-              每月限量
-            </Link>
+            {primaryNavLink ? (
+              <Link className="transition hover:text-crystal-gold" href={primaryNavLink.href} onClick={() => setCategoryOpen(false)}>
+                {primaryNavLink.label}
+              </Link>
+            ) : null}
             <div className="relative" onMouseEnter={openCategoryMenu} onMouseLeave={scheduleCategoryMenuClose}>
               <button
                 className="inline-flex items-center gap-1.5 transition hover:text-crystal-gold"
@@ -173,7 +175,7 @@ export function Header() {
               </button>
             </div>
             <div className="mt-10 grid gap-3">
-              {[{ label: "所有商品", href: "/products" }, { label: "客製化方案", href: "/custom" }, ...visibleNavLinks].map((link) => (
+              {[...shopNavbar.mobilePrimaryLinks, ...visibleNavLinks].map((link) => (
                 <Link
                   className="rounded-md border border-crystal-line bg-white/70 px-4 py-3 text-crystal-ink"
                   href={link.href}
@@ -201,26 +203,29 @@ export function Footer() {
         <div>
           <Brand />
           <p className="mt-5 max-w-sm text-xs leading-7 text-crystal-muted">
-            專屬你的能量水晶，陪你走向更好的每一天。
+            {shopFooter.description}
+          </p>
+          <p className="mt-5 text-xs text-crystal-muted">
+            © {new Date().getFullYear()} {shopBrand.legalName}. All rights reserved.
           </p>
         </div>
-        <div className="grid gap-3 text-xs  text-crystal-muted">
-          <span className="luxury-eyebrow">Explore</span>
-          <Link href="/products">所有商品</Link>
-          <Link href="/custom">客製化方案</Link>
-          <Link href="/order-lookup">訂單查詢</Link>
-          <Link href="/shopping-guide">購物說明</Link>
-        </div>
-        <div className="grid gap-3 text-xs text-crystal-muted">
-          <span className="luxury-eyebrow">Contact</span>
-          <Link href="/contact">聯絡我們</Link>
-          <a href={contactLinks.instagram.href} rel="noreferrer" target="_blank">
-            Instagram
-          </a>
-          <a href={contactLinks.line.href} rel="noreferrer" target="_blank">
-            LINE
-          </a>
-        </div>
+        {shopFooter.columns.map((column) => (
+          <div className="grid gap-3 text-xs text-crystal-muted" key={column.title}>
+            <span className="luxury-eyebrow">{column.title}</span>
+            {column.links.map((link) => {
+              const href = link.href === "instagram" ? contactLinks.instagram.href : link.href === "line" ? contactLinks.line.href : link.href;
+              return "external" in link && link.external ? (
+                <a href={href} key={link.label} rel="noreferrer" target="_blank">
+                  {link.label}
+                </a>
+              ) : (
+                <Link href={href} key={link.label}>
+                  {link.label}
+                </Link>
+              );
+            })}
+          </div>
+        ))}
       </div>
     </footer>
   );

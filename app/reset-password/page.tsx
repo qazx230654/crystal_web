@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FormEvent, useEffect, useState } from "react";
+import { shopBrand } from "@/config/shop";
 
 export default function ResetPasswordPage() {
   const router = useRouter();
@@ -52,9 +53,9 @@ export default function ResetPasswordPage() {
     <section className="container-shell flex min-h-[70vh] items-center justify-center py-14">
       <div className="w-full max-w-md border border-crystal-line bg-white/76 p-8 shadow-soft">
         <Link className="font-serif text-2xl font-semibold text-crystal-ink" href="/">
-          Crystal
+          {shopBrand.name}
         </Link>
-        <p className="mt-2 text-xs font-bold uppercase tracking-[0.28em] text-crystal-muted">Crystal Energy</p>
+        <p className="mt-2 text-xs font-bold uppercase tracking-[0.28em] text-crystal-muted">{shopBrand.tagline}</p>
         <h1 className="mt-8 text-3xl font-semibold">重設密碼</h1>
         <form className="mt-8 grid gap-5" onSubmit={handleSubmit}>
           <label className="grid gap-2">

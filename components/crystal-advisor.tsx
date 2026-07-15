@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { MessageCircle, Send, Sparkles, X } from "lucide-react";
 import { useState } from "react";
+import { shopBrand } from "@/config/shop";
 
 type AdvisorProduct = {
   id: string;
@@ -45,7 +46,7 @@ export function CrystalAdvisor() {
     {
       id: "welcome",
       role: "assistant",
-      text: "你好，我是 Crystal 顧問。告訴我你現在想靠近的狀態，我會先推薦幾款適合參考的晶石。"
+      text: `你好，我是 ${shopBrand.name} 顧問。告訴我你現在想靠近的狀態，我會先推薦幾款適合參考的晶石。`
     }
   ]);
   const [loadingCategory, setLoadingCategory] = useState<string | null>(null);
@@ -81,7 +82,7 @@ export function CrystalAdvisor() {
                 <Sparkles size={16} />
               </span>
               <div>
-                <p className="text-sm font-semibold">Crystal 顧問</p>
+                <p className="text-sm font-semibold">{shopBrand.name} 顧問</p>
                 <p className="text-xs text-crystal-muted">水晶能量顧問 · 線上中</p>
               </div>
             </div>
@@ -133,7 +134,7 @@ export function CrystalAdvisor() {
             </div>
           </div>
           <div className="flex items-center gap-2 border-t border-crystal-gold/18 bg-white px-3 py-3">
-            <input className="min-w-0 flex-1 rounded-full border border-crystal-gold/25 bg-crystal-cream/50 px-4 py-2 text-xs outline-none placeholder:text-crystal-muted" placeholder="問問 Crystal 顧問..." />
+            <input className="min-w-0 flex-1 rounded-full border border-crystal-gold/25 bg-crystal-cream/50 px-4 py-2 text-xs outline-none placeholder:text-crystal-muted" placeholder={`問問 ${shopBrand.name} 顧問...`} />
             <button className="grid size-10 place-items-center rounded-full bg-crystal-champagne/70 text-crystal-gold" type="button">
               <Send size={16} />
             </button>

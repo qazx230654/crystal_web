@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FormEvent, useState } from "react";
 import { useAuth } from "@/components/auth-context";
+import { shopBrand } from "@/config/shop";
 
 function getNextPath() {
   if (typeof window === "undefined") return "/account";
@@ -48,9 +49,9 @@ export default function LoginPage() {
     <section className="container-shell flex min-h-[70vh] items-center justify-center py-14">
       <div className="w-full max-w-md rounded-md border border-crystal-line bg-white/76 p-8 shadow-soft">
         <Link className="font-serif text-2xl font-semibold text-crystal-rose" href="/">
-          Crystal
+          {shopBrand.name}
         </Link>
-        <p className="mt-2 text-xs font-bold uppercase tracking-[0.28em] text-crystal-muted">Crystal Energy</p>
+        <p className="mt-2 text-xs font-bold uppercase tracking-[0.28em] text-crystal-muted">{shopBrand.tagline}</p>
         <h1 className="mt-8 text-3xl font-semibold">會員登入</h1>
         <p className="mt-3 text-sm text-crystal-muted">
           還沒有帳號？ <Link className="text-crystal-rose" href="/register">立即註冊</Link>

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { shopBrand } from "@/config/shop";
 
 export function CheckoutLoadingState({ message }: { message: string }) {
   return (
@@ -27,9 +28,9 @@ export function CheckoutModeGate({ onGuestCheckout }: { onGuestCheckout: () => v
     <section className="container-shell grid min-h-[72vh] place-items-center py-12">
       <div className="w-full max-w-xl text-center">
         <Link className="font-serif text-3xl font-semibold tracking-[0.18em]" href="/">
-          Crystal
+          {shopBrand.name}
         </Link>
-        <p className="mt-1 text-xs uppercase tracking-[0.34em] text-crystal-muted">Crystal Energy</p>
+        <p className="mt-1 text-xs uppercase tracking-[0.34em] text-crystal-muted">{shopBrand.tagline}</p>
         <div className="mt-10 border border-crystal-line bg-white p-10 text-left">
           <h1 className="text-3xl font-semibold">如何結帳</h1>
           <p className="mt-2 text-sm text-crystal-muted">選擇登入會員，或以訪客身分結帳。</p>

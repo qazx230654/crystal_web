@@ -131,7 +131,7 @@ export default function AccountPage() {
   const metadataName = typeof member.user.user_metadata?.name === "string" ? member.user.user_metadata.name : "";
   const displayName = profile?.name || metadataName || email.split("@")[0] || "會員";
   const emailVerified = Boolean(member.user.email_confirmed_at);
-  const isAdmin = profile?.role === "admin" && (profile.status ?? "active") === "active";
+  const isAdmin = profile?.role === "admin" && ["active", "demo"].includes(profile.status ?? "active");
 
   return (
     <section className="bg-[#f8f5f2] pb-20">

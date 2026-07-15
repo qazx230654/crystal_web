@@ -2,6 +2,7 @@ import Link from "next/link";
 import { BrandStorySections } from "@/app/about/brand-story-sections";
 import { brandStorySections } from "@/app/about/brand-story-model";
 import { Reveal } from "@/components/reveal";
+import { shopBrand } from "@/config/shop";
 
 export default function AboutPage() {
   return (
@@ -10,7 +11,7 @@ export default function AboutPage() {
         <p className="luxury-eyebrow">Our Story</p>
         <h1 className="mt-5 font-serif text-4xl font-semibold leading-tight text-crystal-ink md:text-6xl">與你的頻率相遇的故事</h1>
         <p className="mt-6 leading-8 text-crystal-muted">
-          從一段自我安頓的日子開始，到今天陪伴超過萬名顧客——這是 Crystal 一直沒有變過的初衷。
+          從一段自我安頓的日子開始，到今天陪伴超過萬名顧客——這是 {shopBrand.name} 一直沒有變過的初衷。
         </p>
       </Reveal>
 

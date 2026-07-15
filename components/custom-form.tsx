@@ -6,7 +6,7 @@ import { type ReactNode, useState } from "react";
 import { Check, MessageCircle } from "lucide-react";
 import { useCart } from "@/components/cart-context";
 import { contactLinks } from "@/config/contact";
-import { mockProducts } from "@/data/mock-products";
+import type { Product } from "@/src/domain/product";
 import {
   customStringOptions,
   fitOptions,
@@ -76,16 +76,20 @@ function ChoiceButton({
   );
 }
 
-export function CustomForm({ planCode }: { planCode: string }) {
+export function CustomForm({ planCode, product }: { planCode: string; product: Product }) {
+  const [wish, setWish] = useState("");
+  const [wristSize, setWristSize] = useState("");
   const [tightness, setTightness] = useState(fitOptions[0].value);
   const [metal, setMetal] = useState(metalToneOptions[2].value);
   const [chain, setChain] = useState(yesNoOptions[1].value);
   const [beadFrame, setBeadFrame] = useState(yesNoOptions[1].value);
   const [stringType, setStringType] = useState(customStringOptions[2].label);
   const [pendant, setPendant] = useState(pendantOptions[1].value);
+  const [colorPreference, setColorPreference] = useState("");
+  const [notes, setNotes] = useState("");
+  const [contact, setContact] = useState("");
   const [submitted, setSubmitted] = useState(false);
   const { addItem } = useCart();
-  const product = mockProducts.find((item) => item.slug === "custom-deposit-product") ?? mockProducts[0];
 
   return (
     <form
@@ -93,7 +97,20 @@ export function CustomForm({ planCode }: { planCode: string }) {
       onSubmit={(event) => {
         event.preventDefault();
         setSubmitted(true);
-        addItem(product, undefined, { plan: planCode, tightness, metal, chain, beadFrame, stringType, pendant });
+        addItem(product, undefined, {
+          plan: planCode,
+          wish,
+          wristSize: `${wristSize} cm`,
+          tightness,
+          metal,
+          chain,
+          beadFrame,
+          stringType,
+          pendant,
+          ...(colorPreference ? { colorPreference } : {}),
+          ...(notes ? { notes } : {}),
+          ...(contact ? { contact } : {})
+        });
       }}
     >
       {planCode === "B" ? (
@@ -109,13 +126,29 @@ export function CustomForm({ planCode }: { planCode: string }) {
         </FormSection>
       ) : (
         <FormSection body="例如：提升自信、招財、愛情、療癒、保護氣場，也可以自由描述目前狀態。" title="1. 您想要什麼功效？">
-          <textarea className="min-h-36 w-full border border-crystal-line bg-white p-4 outline-crystal-rose" placeholder="寫下您想要的功效或願望，也可以描述目前的困境或期待的改變" />
+          <textarea
+            className="min-h-36 w-full border border-crystal-line bg-white p-4 outline-crystal-rose"
+            onChange={(event) => setWish(event.target.value)}
+            placeholder="寫下您想要的功效或願望，也可以描述目前的困境或期待的改變"
+            required
+            value={wish}
+          />
         </FormSection>
       )}
 
       <FormSection body="請用皮尺量淨手圍（cm），可選 13-19 cm，不需要自行加減。" title="2. 手圍尺寸是多少？">
         <div className="flex flex-wrap items-center gap-3">
-          <input className="w-40 border border-crystal-line bg-white p-4 outline-crystal-rose" placeholder="例如：15.5" step="0.1" type="number" />
+          <input
+            className="w-40 border border-crystal-line bg-white p-4 outline-crystal-rose"
+            max={19}
+            min={13}
+            onChange={(event) => setWristSize(event.target.value)}
+            placeholder="例如：15.5"
+            required
+            step="0.1"
+            type="number"
+            value={wristSize}
+          />
           <span className="text-sm text-crystal-muted">cm</span>
         </div>
         <p className="mt-3 text-xs leading-6 text-crystal-muted">不知道怎麼量？拿皮尺平貼在手腕最細的位置，繞一圈的長度就是淨手圍。</p>
@@ -202,11 +235,21 @@ export function CustomForm({ planCode }: { planCode: string }) {
       </FormSection>
 
       <FormSection body="例如：偏粉色系、紫色、透明；沒有特別指定也沒關係，留空即可。" optional title="8. 有想要的水晶顏色嗎？">
-        <textarea className="min-h-32 w-full border border-crystal-line bg-white p-4 outline-crystal-rose" placeholder="寫下喜歡的顏色或色系，沒有指定可以留空" />
+        <textarea
+          className="min-h-32 w-full border border-crystal-line bg-white p-4 outline-crystal-rose"
+          onChange={(event) => setColorPreference(event.target.value)}
+          placeholder="寫下喜歡的顏色或色系，沒有指定可以留空"
+          value={colorPreference}
+        />
       </FormSection>
 
       <FormSection body="任何其他特殊需求都可以寫在這裡，例如避開材質、特別風格、紀念意義等。" optional title="9. 還有其他特殊需求嗎？">
-        <textarea className="min-h-32 w-full border border-crystal-line bg-white p-4 outline-crystal-rose" placeholder="有任何其他想說的都可以寫在這裡" />
+        <textarea
+          className="min-h-32 w-full border border-crystal-line bg-white p-4 outline-crystal-rose"
+          onChange={(event) => setNotes(event.target.value)}
+          placeholder="有任何其他想說的都可以寫在這裡"
+          value={notes}
+        />
       </FormSection>
 
       <FormSection title="10. 完成！付完訂金後記得加入 LINE">
@@ -218,11 +261,16 @@ export function CustomForm({ planCode }: { planCode: string }) {
         </div>
         <label className="mt-5 grid gap-2">
           <span className="text-sm text-crystal-muted">Instagram 帳號 / LINE ID</span>
-          <input className="border border-crystal-line bg-white p-4 outline-crystal-rose" placeholder="例如：@your_ig_handle 或 LINE ID" />
+          <input
+            className="border border-crystal-line bg-white p-4 outline-crystal-rose"
+            onChange={(event) => setContact(event.target.value)}
+            placeholder="例如：@your_ig_handle 或 LINE ID"
+            value={contact}
+          />
         </label>
       </FormSection>
 
-      {submitted ? <p className="border border-crystal-line bg-crystal-pearl p-4 text-sm text-crystal-muted">已加入購物袋，這是 mock API 流程，不會送出真實訂單。</p> : null}
+      {submitted ? <p className="border border-crystal-line bg-crystal-pearl p-4 text-sm text-crystal-muted">已加入購物袋，請前往購物袋確認內容並結帳。</p> : null}
       <div className="flex flex-wrap justify-between gap-3">
         <Link className="border border-crystal-line bg-white px-5 py-3 text-sm text-crystal-muted" href="/custom">
           返回方案頁

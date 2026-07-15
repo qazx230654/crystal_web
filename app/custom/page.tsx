@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ArrowDown, ArrowRight, Gem, MessageCircle, Sparkles } from "lucide-react";
 import { contactLinks } from "@/config/contact";
+import { shopBrand } from "@/config/shop";
 import { customPlans } from "@/data/site";
 
 const primaryPlan = customPlans.find((plan) => plan.code === "A") ?? customPlans[0];
@@ -42,7 +43,7 @@ export default function CustomPage() {
         <div className="absolute inset-x-0 top-0 h-40 bg-linear-to-b from-white to-transparent" />
         <div className="absolute bottom-0 left-1/2 h-64 w-[min(78vw,760px)] -translate-x-1/2 rounded-full bg-[#eadfd8]/45 blur-3xl" />
         <div className="relative mx-auto max-w-3xl">
-          <p className="text-xs uppercase tracking-[0.6em] text-[#a28773]">Crystal</p>
+          <p className="text-xs uppercase tracking-[0.6em] text-[#a28773]">{shopBrand.name}</p>
           <h1 className="mt-10 font-serif text-5xl font-light leading-[1.45] tracking-[0.16em] text-crystal-ink md:text-7xl">
             為此刻的您
             <span className="mt-3 block text-[#9d7d63]">編一段水晶頻率</span>
@@ -56,42 +57,42 @@ export default function CustomPage() {
         </Link>
       </section>
 
-      <section className="container-shell py-20 md:py-28" id="plans">
+      <section className="container-shell py-14 md:py-20" id="plans">
         <div className="text-center">
           <div className="inline-flex items-center gap-4 text-[#d8beb3]">
             <Sparkles size={15} />
             <h2 className="font-serif text-3xl font-light tracking-[0.24em] text-crystal-ink md:text-4xl">一對一純客製手鍊</h2>
             <Sparkles size={15} />
           </div>
-          <p className="mt-7 text-xs uppercase tracking-[0.46em] text-crystal-muted">Professional Consultation</p>
-          <p className="mt-5 text-sm leading-8 text-crystal-muted">先從最核心的客製流程開始，讓需求、尺寸與風格都能被清楚記錄。</p>
+          <p className="mt-5 text-xs uppercase tracking-[0.46em] text-crystal-muted">Professional Consultation</p>
+          <p className="mt-4 text-sm leading-8 text-crystal-muted">先從最核心的客製流程開始，讓需求、尺寸與風格都能被清楚記錄。</p>
         </div>
 
-        <article className="mx-auto mt-16 max-w-4xl overflow-hidden rounded-[32px] border border-white/80 bg-[#f4ecd8] p-6 shadow-[0_24px_80px_rgba(72,54,43,0.10)] md:p-10">
-          <div className="relative overflow-hidden rounded-[28px] border border-white/70 bg-[#f7efdc] px-6 py-12 text-center md:px-12">
-            <span className="absolute right-8 top-8 font-serif text-[9rem] leading-none text-white/35 md:text-[12rem]">*</span>
+        <article className="mx-auto mt-10 max-w-2xl overflow-hidden rounded-[28px] border border-white/80 bg-[#f4ecd8] p-4 shadow-[0_24px_80px_rgba(72,54,43,0.10)] md:p-6">
+          <div className="relative overflow-hidden rounded-[24px] border border-white/70 bg-[#f7efdc] px-6 py-7 text-center md:px-8">
+            <span className="absolute right-6 top-5 font-serif text-[6rem] leading-none text-white/35 md:text-[7rem]">*</span>
             <div className="relative">
-              <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl border border-[#e7d8c7] bg-white/88 text-[#9d7d63] shadow-sm">
-                <Gem size={24} />
+              <div className="mx-auto grid h-11 w-11 place-items-center rounded-2xl border border-[#e7d8c7] bg-white/88 text-[#9d7d63] shadow-sm">
+                <Gem size={20} />
               </div>
-              <h3 className="mt-9 font-serif text-3xl font-light tracking-[0.16em] md:text-4xl">{primaryPlan.title}</h3>
-              <p className="mt-5 text-sm tracking-[0.18em] text-[#a28773]">費用</p>
-              <p className="mt-3 text-crystal-muted">{primaryPlan.price}</p>
-              <div className="mx-auto mt-10 h-px w-16 bg-[#d9c9bd]" />
+              <h3 className="mt-5 font-serif text-2xl font-light tracking-[0.16em] md:text-3xl">{primaryPlan.title}</h3>
+              <p className="mt-3 text-sm tracking-[0.18em] text-[#a28773]">費用</p>
+              <p className="mt-1.5 text-crystal-muted">{primaryPlan.price}</p>
+              <div className="mx-auto mt-5 h-px w-16 bg-[#d9c9bd]" />
 
-              <div className="mx-auto mt-10 max-w-xl rounded-[22px] border border-white/70 bg-white/40 p-6 text-left md:p-8">
+              <div className="mx-auto mt-5 max-w-xl rounded-[20px] border border-white/70 bg-white/40 p-4 text-left md:p-5">
                 <p className="text-center text-xs uppercase tracking-[0.34em] text-[#a28773]">可討論內容</p>
-                <div className="mt-7 grid gap-5 text-base leading-8 text-crystal-muted">
+                <div className="mt-4 grid gap-2.5 text-sm leading-6 text-crystal-muted">
                   {serviceItems.map((item) => (
-                    <p className="border-l-4 border-[#eadbd2] pl-5" key={item}>
+                    <p className="border-l-4 border-[#eadbd2] pl-4" key={item}>
                       {item}
                     </p>
                   ))}
                 </div>
               </div>
 
-              <div className="mx-auto mt-10 h-px max-w-xl bg-[#d9c9bd]" />
-              <Link className="mx-auto mt-8 inline-flex w-full max-w-xl items-center justify-center gap-3 bg-[#9d7d63] px-6 py-4 text-sm font-semibold tracking-[0.24em] text-white shadow-[0_12px_24px_rgba(112,82,62,0.18)] transition hover:bg-crystal-ink" href={primaryPlan.href}>
+              <div className="mx-auto mt-5 h-px max-w-xl bg-[#d9c9bd]" />
+              <Link className="mx-auto mt-5 inline-flex w-full max-w-xl items-center justify-center gap-3 bg-[#9d7d63] px-6 py-3 text-sm font-semibold tracking-[0.24em] text-white shadow-[0_12px_24px_rgba(112,82,62,0.18)] transition hover:bg-crystal-ink" href={primaryPlan.href}>
                 開始書寫客製需求 <ArrowRight size={16} />
               </Link>
             </div>
@@ -135,9 +136,9 @@ export default function CustomPage() {
             讓日常，慢慢靠近更穩定的頻率
           </p>
           <a className="mx-auto mt-12 inline-flex items-center gap-3 rounded-full bg-[#9d7d63] px-10 py-5 text-sm font-semibold tracking-[0.18em] text-white shadow-[0_18px_46px_rgba(112,82,62,0.18)] transition hover:bg-crystal-ink" href={contactLinks.line.href} rel="noreferrer" target="_blank">
-            聯繫 Crystal <MessageCircle size={17} />
+            聯繫 {shopBrand.name} <MessageCircle size={17} />
           </a>
-          <p className="mt-24 text-xs uppercase tracking-[0.54em] text-[#c4aea2]">Crystal</p>
+          <p className="mt-24 text-xs uppercase tracking-[0.54em] text-[#c4aea2]">{shopBrand.name}</p>
         </div>
       </section>
     </section>

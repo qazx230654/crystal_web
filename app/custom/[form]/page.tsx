@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { CustomForm } from "@/components/custom-form";
 import { customPlans } from "@/data/site";
+import { findProduct } from "@/services/product-service";
 
 const formMap: Record<string, number> = {
   form: 0,
@@ -9,8 +10,11 @@ const formMap: Record<string, number> = {
   "form-d": 3
 };
 
-export default function CustomFormPage({ params }: { params: { form: string } }) {
+const customBraceletSlug = "custom-aura-bracelet";
+
+export default async function CustomFormPage({ params }: { params: { form: string } }) {
   const plan = customPlans[formMap[params.form] ?? 0];
+  const product = await findProduct(customBraceletSlug);
 
   return (
     <section className="container-shell py-12">
@@ -28,7 +32,7 @@ export default function CustomFormPage({ params }: { params: { form: string } })
             <li>3. 初版確認後提供尾款報價，尾款支付完畢後準備出貨。</li>
           </ol>
         </section>
-        <CustomForm planCode={plan.code} />
+        <CustomForm planCode={plan.code} product={product} />
       </div>
     </section>
   );
