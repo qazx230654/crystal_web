@@ -1,5 +1,3 @@
-import { contactLinks } from "@/config/contact";
-
 export type WorkshopTagIcon = "location" | "people" | "duration";
 
 export type WorkshopTag = {
@@ -26,10 +24,6 @@ export type WorkshopExperience = {
   highlightsTitle: string;
   highlights: string[];
   pricing?: WorkshopPricing;
-  cta: {
-    label: string;
-    href: string;
-  };
 };
 
 export type WorkshopTestimonial = {
@@ -113,10 +107,6 @@ export const workshopExperiences: WorkshopExperience[] = [
       price: "NT$2,500",
       note: "含所有材料費",
       groupDiscounts: ["2 人同行 -$100/人", "3 人同行 -$150/人"]
-    },
-    cta: {
-      label: "聯繫 LINE 諮詢課程",
-      href: contactLinks.line.href
     }
   },
   {
@@ -137,10 +127,6 @@ export const workshopExperiences: WorkshopExperience[] = [
       "梳理心結，找回內在安定的力量",
       "占卜後提供具體可行的行動建議",
       "適合初次接觸塔羅或定期諮詢的你"
-    ],
-    cta: {
-      label: "聯繫 LINE 預約占卜",
-      href: contactLinks.line.href
-    }
+    ]
   }
 ];

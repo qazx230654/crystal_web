@@ -133,6 +133,9 @@ export default function AdminProductsPage() {
           <Button asChild size="sm" variant="outline">
             <Link href="/admin/orders">訂單管理</Link>
           </Button>
+          <Button asChild size="sm" variant="outline">
+            <Link href="/admin/experiences">體驗設定</Link>
+          </Button>
           <Button onClick={logout} size="sm" type="button" variant="outline">
             登出
           </Button>

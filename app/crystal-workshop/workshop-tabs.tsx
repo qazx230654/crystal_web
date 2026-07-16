@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { Clock, MapPin, Users } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { WorkshopExperience, WorkshopTagIcon } from "@/app/crystal-workshop/workshop-model";
@@ -113,14 +114,12 @@ export function WorkshopTabs({ experiences }: { experiences: WorkshopExperience[
                 </div>
               ) : null}
 
-              <a
-                className="mt-8 inline-flex items-center justify-center gap-2 rounded-full bg-[#06c755] px-6 py-3 text-sm font-semibold text-white shadow-[0_14px_30px_rgba(6,199,85,0.28)] transition hover:brightness-105"
-                href={experience.cta.href}
-                rel="noreferrer"
-                target="_blank"
+              <Link
+                className="mt-8 inline-flex items-center justify-center gap-2 rounded-full bg-crystal-ink px-6 py-3 text-sm font-semibold text-white shadow-[0_14px_30px_rgba(30,24,20,0.28)] transition hover:brightness-110"
+                href={`/booking/${experience.id}`}
               >
-                {experience.cta.label}
-              </a>
+                立即預約
+              </Link>
             </div>
           </TabsContent>
         ))}

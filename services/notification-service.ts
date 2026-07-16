@@ -1,4 +1,5 @@
 import type { OrderRecord } from "@/services/order-service";
+import type { BookingRecord } from "@/services/booking-service";
 
 type OrderItem = {
   product_name?: string;
@@ -156,6 +157,65 @@ export async function notifyCustomerOrderShipped(input: {
     subject,
     text: lines.join("\n"),
     to: order.customer_email
+  });
+}
+
+export async function notifyStoreOwnerNewBooking(input: { booking: BookingRecord }) {
+  if (!storeOwnerEmail) {
+    console.warn("[notifications] STORE_OWNER_EMAIL is not configured; skipping owner new-booking email.");
+    return;
+  }
+
+  const { booking } = input;
+  const subject = `新預約 ${booking.booking_number}｜${formatCurrency(booking.total)}`;
+  const lines = [
+    `新預約：${booking.booking_number}`,
+    `客戶：${booking.customer_name} / ${booking.customer_phone}`,
+    `Email：${booking.customer_email ?? "-"}`,
+    `人數：${booking.headcount} 人`,
+    `付款：${booking.payment_method}`,
+    `總計：${formatCurrency(booking.total)}`,
+    "",
+    `${siteUrl}/admin/bookings`
+  ];
+
+  await sendEmail({
+    html: renderEmailHtml({
+      intro: "收到一筆新預約，請到後台確認付款與場次安排。",
+      lines,
+      title: `新預約 ${booking.booking_number}`
+    }),
+    subject,
+    text: lines.join("\n"),
+    to: storeOwnerEmail
+  });
+}
+
+export async function notifyCustomerBookingCreated(input: { booking: BookingRecord }) {
+  const { booking } = input;
+  if (!booking.customer_email) return;
+
+  const subject = `預約確認｜${booking.booking_number}`;
+  const lines = [
+    `${booking.customer_name}，感謝您的預約！我們已收到您的預約。`,
+    `預約編號：${booking.booking_number}`,
+    `人數：${booking.headcount} 人`,
+    `付款方式：${booking.payment_method}`,
+    "",
+    `總計：${formatCurrency(booking.total)}`,
+    "",
+    `預約查詢：${siteUrl}/bookings/${booking.id}/success`
+  ];
+
+  await sendEmail({
+    html: renderEmailHtml({
+      intro: "我們已收到您的預約，確認付款後即完成排定。",
+      lines,
+      title: `預約確認 ${booking.booking_number}`
+    }),
+    subject,
+    text: lines.join("\n"),
+    to: booking.customer_email
   });
 }
 

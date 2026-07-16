@@ -122,6 +122,12 @@ export default async function AdminDashboardPage() {
           <Button asChild variant="outline">
             <Link href="/admin/products">商品管理</Link>
           </Button>
+          <Button asChild variant="outline">
+            <Link href="/admin/bookings">預約管理</Link>
+          </Button>
+          <Button asChild variant="outline">
+            <Link href="/admin/experiences">體驗設定</Link>
+          </Button>
         </div>
       </div>
 
